@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(npm -v)",
+      "Bash(npx --yes create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(npx --yes create-next-app@latest --help)",
+      "Read(//Users/alejandromorales/Desktop/PROYECTOS CLAUDE/PIXEL CLAUDE/**)",
+      "Bash(npx --yes create-next-app@latest sistema-solicitudes-web --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --use-npm --disable-git)",
+      "Bash(curl -sI --max-time 10 https://registry.npmjs.org/next)",
+      "Bash(npm install *)",
+      "Bash(rsync -a sistema-solicitudes-web/ \"SISTEMA SOLICITUDES/\")",
+      "Bash(rm -rf sistema-solicitudes-web)",
+      "Bash(npm run *)",
+      "Bash(ls -la \"/Users/alejandromorales/package-lock.json\" 2>&1; cat \"/Users/alejandromorales/Desktop/PROYECTOS CLAUDE/PIXEL CLAUDE/SISTEMA SOLICITUDES/package.json\" | head -5)",
+      "Bash(curl -s -X POST https://ibtfkuqijahfkfgwvrrl.supabase.co/rest/v1/rpc/fn_correo_autorizado -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA' -H 'Content-Type: application/json' -d '{\"p_correo\": \"alejomorales3d@gmail.com\"}')",
+      "Bash(sed -i '' 's/Login sin contraseña por correo \\(Magic Link\\)/Login sin contraseña por correo \\(código OTP de 6 dígitos\\)/' 01-prd/prd-general.md)",
+      "Bash(sed -i '' 's/\\\\*\\\\*Auth\\\\*\\\\* — Magic Link \\(Supabase Auth por correo\\)/**Auth** — código OTP por correo \\(Supabase Auth\\)/' 01-prd/prd-general.md)",
+      "Bash(sed -i '' 's/Auth por Magic Link no requiere Google Cloud Console/Auth por código OTP no requiere Google Cloud Console/' 01-prd/prd-general.md)",
+      "Bash(sed -i '' 's/Supabase da Auth por Magic Link \\(correo, sin contraseña, sin requerir Google Cloud Console\\)/Supabase da Auth por código OTP de 6 dígitos al correo \\(sin contraseña, sin requerir Google Cloud Console\\)/' 02-sdd/arquitectura.md)",
+      "Bash(sed -i '' 's/F\\\\[Auth - Magic Link\\\\]/F[Auth - Código OTP]/' 02-sdd/arquitectura.md)",
+      "Bash(curl -s -X POST https://ibtfkuqijahfkfgwvrrl.supabase.co/auth/v1/otp -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA' -H 'Content-Type: application/json' -d '{\"email\": \"alejomorales3d@gmail.com\"}')",
+      "Bash(python3 -c ' *)",
+      "Bash(curl -s 'https://ibtfkuqijahfkfgwvrrl.supabase.co/rest/v1/colaborador?select=nombre_completo,correo,auth_user_id,activo&correo=eq.alejomoraleslab@gmail.com' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA')",
+      "Bash(curl -s -w '\\\\nHTTP_STATUS:%{http_code}\\\\n' -X POST https://ibtfkuqijahfkfgwvrrl.supabase.co/storage/v1/object/firmas/test-conexion.jpg -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA' -H 'Content-Type: image/jpeg' --data-binary @/private/tmp/claude-501/-Users-alejandromorales-Desktop-PROYECTOS-CLAUDE-PIXEL-CLAUDE-SISTEMA-SOLICITUDES/c25bf81c-4c62-4113-84b8-3fa24f87688b/scratchpad/firma-prueba.jpg --max-time 15)",
+      "Bash(git init *)",
+      "Bash(git add *)"
+    ]
+  }
+}
