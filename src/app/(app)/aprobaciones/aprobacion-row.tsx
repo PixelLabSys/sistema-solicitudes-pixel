@@ -113,6 +113,11 @@ export function AprobacionRow({
               {vacaciones.observaciones}
             </p>
           )}
+          {error && !mostrarRechazo && (
+            <div className="form-error" style={{ marginTop: 8 }}>
+              {error}
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", gap: 8 }}>
           <button className="btn btn-success btn-sm" disabled={pending} onClick={handleAprobar}>
