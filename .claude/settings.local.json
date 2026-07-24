@@ -28,7 +28,9 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(curl -sL \"https://ibtfkuqijahfkfgwvrrl.supabase.co/storage/v1/object/sign/pdfs/88408e7d-16a6-47fe-aa72-d3023783fe5c.pdf?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80ZjU2YTZmMC1kMjI3LTQxMDgtODZjNS1iZjI1ODZkZWE0ZjUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwZGZzLzg4NDA4ZTdkLTE2YTYtNDdmZS1hYTcyLWQzMDIzNzgzZmU1Yy5wZGYiLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzg0ODU3ODg2LCJleHAiOjE3ODQ4NTgxODZ9.NdCbbhv9w4kClp_sFgG2ZqGTYrcZ8fzrZRzsZ8spk3o\" -o /tmp/sp0001.pdf)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(npx --yes tsx --version)",
+      "Bash(npx tsx *)"
     ]
   }
 }
