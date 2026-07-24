@@ -25,7 +25,7 @@ Un mismo colaborador puede tener varios roles simultáneamente (ej. ser Líder d
 ## 5. Alcance del MVP y exclusiones
 
 **Dentro del MVP:**
-- Login sin contraseña por correo (código OTP de 6 dígitos) restringido a la lista de correos autorizados.
+- Login con Google (OAuth) restringido a la lista de correos autorizados en la tabla `colaborador`.
 - 3 formularios: Solicitud de Permisos, Solicitud de Vacaciones, Solicitud de Adelanto de Nómina.
 - Flujo de aprobación de un solo nivel: Colaborador → Líder directo → (si aprueba) notificación a Líder de TH.
 - Notificaciones por correo electrónico en cada transición de estado.
@@ -42,7 +42,7 @@ Un mismo colaborador puede tener varios roles simultáneamente (ej. ser Líder d
 - Firma digital dibujada en pantalla (se usa imagen subida).
 
 ## 6. Módulos y funcionalidades
-1. **Auth** — código OTP por correo (Supabase Auth) + validación contra lista blanca de correos.
+1. **Auth** — Google OAuth (Supabase Auth) + validación contra lista blanca de correos.
 2. **Solicitudes** — formularios de Permisos / Vacaciones / Adelanto de Nómina.
 3. **Aprobaciones** — bandeja de aprobación para líderes de área.
 4. **Notificaciones** — envío de correos en cada cambio de estado.
@@ -102,7 +102,7 @@ Un mismo colaborador puede tener varios roles simultáneamente (ej. ser Líder d
 ## 12. Dependencias, restricciones y preguntas abiertas
 **Restricciones conocidas:**
 - Depende de que Alejo entregue la lista inicial de colaboradores (nombre + correo) y quién es cada líder.
-- Depende del proyecto Supabase (Auth por código OTP no requiere Google Cloud Console) y de un servicio de email transaccional (Resend) para las notificaciones propias del sistema.
+- Depende de un OAuth Client de Google Cloud (modo Externo, no restringido a un solo Workspace — ver nota de decisión en SDD sobre por qué, dado que hay colaboradores en dos Workspaces distintos: pixel-g.com y pxl.com) y de un servicio de email transaccional (Resend) para las notificaciones propias del sistema.
 
 **Preguntas abiertas resueltas** (ver reglas de negocio sección 9 y roles sección 3): regla de 45 días, colaborador sin líder, motivo de rechazo, dashboard para líderes de área, almacenamiento de PDF y retención de datos.
 

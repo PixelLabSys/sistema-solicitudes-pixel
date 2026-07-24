@@ -1,82 +1,38 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-type Paso = "correo" | "codigo";
-
 export default function LoginPage() {
-  const router = useRouter();
-  const [paso, setPaso] = useState<Paso>("correo");
-  const [correo, setCorreo] = useState("");
-  const [codigo, setCodigo] = useState("");
   const [cargando, setCargando] = useState(false);
   const [mensajeError, setMensajeError] = useState("");
 
-  async function handleEnviarCodigo(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleLoginGoogle() {
     setCargando(true);
     setMensajeError("");
 
     const supabase = createClient();
-    const correoNormalizado = correo.trim().toLowerCase();
-
-    const { data: autorizado, error: errorRpc } = await supabase.rpc(
-      "fn_correo_autorizado",
-      { p_correo: correoNormalizado }
-    );
-
-    if (errorRpc) {
-      setCargando(false);
-      setMensajeError("No pudimos validar tu correo. Intenta de nuevo.");
-      return;
-    }
-
-    if (!autorizado) {
-      setCargando(false);
-      setMensajeError(
-        "Tu correo no tiene acceso al sistema. Contacta a Talento Humano."
-      );
-      return;
-    }
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email: correoNormalizado,
-    });
-
-    setCargando(false);
-
-    if (error) {
-      setMensajeError("No pudimos enviar el código. Intenta de nuevo.");
-      return;
-    }
-
-    setPaso("codigo");
-  }
-
-  async function handleVerificarCodigo(e: React.FormEvent) {
-    e.preventDefault();
-    setCargando(true);
-    setMensajeError("");
-
-    const supabase = createClient();
-    const { error } = await supabase.auth.verifyOtp({
-      email: correo.trim().toLowerCase(),
-      token: codigo.trim(),
-      type: "email",
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     });
 
     if (error) {
       setCargando(false);
-      setMensajeError("El código no es válido o expiró. Solicita uno nuevo.");
-      return;
+      setMensajeError("No pudimos iniciar sesión con Google. Intenta de nuevo.");
     }
-
-    await supabase.rpc("fn_vincular_colaborador");
-    router.push("/");
-    router.refresh();
   }
+
+  const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
+  const errorUrl = params?.get("error");
+  const mensajeErrorUrl =
+    errorUrl === "no_autorizado"
+      ? "Tu cuenta de Google no tiene acceso al sistema. Contacta a Talento Humano."
+      : errorUrl
+      ? "No pudimos iniciar tu sesión. Intenta de nuevo."
+      : "";
 
   return (
     <div
@@ -105,7 +61,7 @@ export default function LoginPage() {
           PIXEL GRAPHIC SAS
         </p>
 
-        {mensajeError && (
+        {(mensajeError || mensajeErrorUrl) && (
           <div
             style={{
               background: "rgba(248,81,73,.12)",
@@ -117,90 +73,18 @@ export default function LoginPage() {
               marginBottom: 16,
             }}
           >
-            {mensajeError}
+            {mensajeError || mensajeErrorUrl}
           </div>
         )}
 
-        {paso === "correo" ? (
-          <form onSubmit={handleEnviarCodigo}>
-            <label
-              style={{
-                fontFamily: "var(--mono)",
-                fontSize: 10,
-                letterSpacing: ".08em",
-                textTransform: "uppercase",
-                color: "var(--text3)",
-              }}
-            >
-              Correo
-            </label>
-            <input
-              type="email"
-              required
-              value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
-              placeholder="nombre@pixel-g.com"
-              className="form-input"
-              style={{ marginTop: 5, marginBottom: 18 }}
-            />
-            <button
-              type="submit"
-              disabled={cargando}
-              className="btn btn-primary"
-              style={{ width: "100%", justifyContent: "center" }}
-            >
-              {cargando ? "Enviando..." : "Enviar código de acceso"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerificarCodigo}>
-            <p style={{ fontSize: 13, color: "var(--text2)", marginBottom: 16 }}>
-              Te enviamos un código de 6 dígitos a <strong>{correo}</strong>.
-              Escríbelo abajo.
-            </p>
-            <label
-              style={{
-                fontFamily: "var(--mono)",
-                fontSize: 10,
-                letterSpacing: ".08em",
-                textTransform: "uppercase",
-                color: "var(--text3)",
-              }}
-            >
-              Código
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              required
-              value={codigo}
-              onChange={(e) => setCodigo(e.target.value)}
-              placeholder="123456"
-              className="form-input"
-              style={{ marginTop: 5, marginBottom: 18, fontFamily: "var(--mono)", letterSpacing: "0.2em" }}
-            />
-            <button
-              type="submit"
-              disabled={cargando}
-              className="btn btn-primary"
-              style={{ width: "100%", justifyContent: "center", marginBottom: 10 }}
-            >
-              {cargando ? "Verificando..." : "Entrar"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPaso("correo");
-                setCodigo("");
-                setMensajeError("");
-              }}
-              className="btn btn-ghost"
-              style={{ width: "100%", justifyContent: "center" }}
-            >
-              Usar otro correo
-            </button>
-          </form>
-        )}
+        <button
+          onClick={handleLoginGoogle}
+          disabled={cargando}
+          className="btn btn-primary"
+          style={{ width: "100%", justifyContent: "center" }}
+        >
+          {cargando ? "Redirigiendo..." : "Iniciar sesión con Google"}
+        </button>
       </div>
     </div>
   );

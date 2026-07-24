@@ -5,7 +5,7 @@
 **Stack:** Next.js (App Router, React) + Supabase (Postgres, Auth, Storage) + Resend (emails transaccionales) + Vercel (hosting).
 
 **Razones:**
-- Supabase da Auth por código OTP de 6 dígitos al correo (sin contraseña, sin requerir Google Cloud Console), base de datos relacional con Row Level Security (RLS) y Storage en una sola plataforma — evita levantar backend propio para un sistema de este tamaño.
+- Supabase da Auth con Google OAuth, base de datos relacional con Row Level Security (RLS) y Storage en una sola plataforma — evita levantar backend propio para un sistema de este tamaño.
 - RLS de Postgres permite modelar los permisos por rol (colaborador/líder/TH) directamente en la base de datos, no solo en el frontend — más seguro ante manipulación de requests.
 - Next.js permite Server Actions/Route Handlers para generar PDFs y disparar emails sin exponer lógica sensible al cliente.
 - Costo $0 en el tamaño actual (~25 colaboradores).
@@ -27,7 +27,7 @@ flowchart TB
 
     subgraph Supabase
         E[(Postgres + RLS)]
-        F[Auth - Código OTP]
+        F[Auth - Google OAuth]
         G[Storage - firmas y PDFs]
     end
 
@@ -47,7 +47,7 @@ flowchart TB
 ```
 
 - **Frontend (Next.js)**: formularios, bandeja de aprobación, dashboard, configuración. Server Actions para escribir a Supabase y disparar generación de PDF/emails.
-- **Supabase Auth**: login por código OTP de 6 dígitos enviado al correo, restringido a lista blanca de correos (tabla `colaboradores`).
+- **Supabase Auth**: login con Google OAuth (modo Externo, cualquier cuenta de Google puede intentarlo), restringido a lista blanca de correos (tabla `colaboradores`) como verdadero filtro de acceso.
 - **Supabase Postgres + RLS**: fuente de verdad de datos y de permisos por fila.
 - **Supabase Storage**: buckets para firmas subidas y PDFs generados.
 - **Resend**: envío de correos de notificación (radicación, decisión, notificación a TH).
@@ -154,7 +154,9 @@ No hay estados intermedios de revisión en el MVP. Mientras está en Pendiente, 
 
 ## 5. Autenticación, roles y permisos
 
-- **Auth**: código OTP de 6 dígitos vía Supabase Auth (`signInWithOtp` + `verifyOtp`). El colaborador escribe su correo, Supabase envía un código por email, el colaborador lo escribe en la app y se crea la sesión (`verifyOtp`). Se prefirió este flujo sobre el enlace clicable porque escáneres de seguridad de correo (Gmail, Outlook) pre-cargan enlaces automáticamente y consumen el token de un solo uso antes de que el usuario lo abra — el código evita ese problema. Antes de enviar el código, se valida que el correo exista y esté `activo=true` en la tabla `colaboradores`; si no, se rechaza con mensaje claro sin llamar a Supabase Auth. No requiere Google Cloud Console ni consentimiento OAuth.
+- **Auth**: Google OAuth vía Supabase Auth (`signInWithOAuth({ provider: 'google' })`). El colaborador hace clic en "Iniciar sesión con Google", completa el consentimiento de Google, y vuelve a `/auth/callback` con un `code` que se intercambia por sesión (`exchangeCodeForSession`).
+
+  **Nota de decisión (2026-07-23):** se evaluaron tres flujos de auth durante la construcción: (1) Google OAuth con el consent screen en modo "Interno" — descartado porque los colaboradores de Pixel Graphic están repartidos en **dos Workspaces de Google distintos y sin relación entre sí** (`pixel-g.com` y `pxl.com`), y "Interno" solo cubre un Workspace a la vez; (2) código OTP de 6 dígitos por correo — se implementó primero para no depender de Google Cloud Console (en un momento Alejo no tenía acceso), pero se abandonó en cuanto se consiguió acceso al Workspace, porque un botón de "Iniciar sesión con Google" es más simple para el usuario final que pedir un código; (3) **Google OAuth con consent screen en modo "Externo"** — la solución final. Con "Externo", cualquier cuenta de Google puede completar el login, pero el filtro real de acceso sigue siendo la lista blanca de la tabla `colaboradores` (validada en `/auth/callback` inmediatamente después del intercambio de sesión, vía `fn_correo_autorizado`); si el correo no está autorizado, se cierra la sesión recién creada y se redirige a login con un mensaje claro. Esto significa que la seguridad real nunca dependió de la restricción de dominio de Google — siempre fue la tabla `colaboradores`, consistente con el resto de la arquitectura (RLS, constraints).
 - **Roles derivados de datos, no de un enum separado**: un colaborador es "líder de área" si `es_lider_area=true`, es "Líder de TH" si `es_lider_th=true`. Estos flags se gestionan desde el módulo de Configuración.
 - **Permisos (RLS en Postgres):**
   - Un colaborador puede leer/crear solo sus propias solicitudes, y solo puede actualizar (editar) o cancelar las suyas mientras estén en estado Pendiente.
@@ -185,7 +187,7 @@ No hay estados intermedios de revisión en el MVP. Mientras está en Pendiente, 
 - Las reglas de negocio críticas están duplicadas a propósito en dos capas: la Server Action da mensajes de error claros al usuario, pero la garantía real está en constraints/triggers de la base de datos (ver §6). Si la Server Action tuviera un bug o se accediera por otra vía, la base de datos sigue rechazando la operación inválida.
 
 ## 8. Integraciones y dependencias externas
-- **Código OTP** (vía Supabase Auth, sin dependencia de Google Cloud Console).
+- **Google OAuth** (vía Supabase Auth, consent screen en modo Externo — ver nota de decisión en §5).
 - **Resend** para envío de correos.
 - Sin integración con nómina/ERP en el MVP (fuera de alcance, confirmado en PRD).
 

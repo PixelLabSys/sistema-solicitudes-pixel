@@ -25,7 +25,8 @@
       "Bash(curl -s 'https://ibtfkuqijahfkfgwvrrl.supabase.co/rest/v1/colaborador?select=nombre_completo,correo,auth_user_id,activo&correo=eq.alejomoraleslab@gmail.com' -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA')",
       "Bash(curl -s -w '\\\\nHTTP_STATUS:%{http_code}\\\\n' -X POST https://ibtfkuqijahfkfgwvrrl.supabase.co/storage/v1/object/firmas/test-conexion.jpg -H 'apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlidGZrdXFpamFoZmtmZ3d2cnJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NTg5MjksImV4cCI6MjEwMDMzNDkyOX0.FJ_hx4JrNDkYRgyCBDH5BFe9RKx9kh2iW2DDKuFjBnA' -H 'Content-Type: image/jpeg' --data-binary @/private/tmp/claude-501/-Users-alejandromorales-Desktop-PROYECTOS-CLAUDE-PIXEL-CLAUDE-SISTEMA-SOLICITUDES/c25bf81c-4c62-4113-84b8-3fa24f87688b/scratchpad/firma-prueba.jpg --max-time 15)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
