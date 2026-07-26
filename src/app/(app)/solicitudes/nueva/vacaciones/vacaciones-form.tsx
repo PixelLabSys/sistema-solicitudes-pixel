@@ -1,19 +1,26 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import type { Colaborador } from "@/lib/types";
+import type { Colaborador, SolicitudVacacionesDetalle } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import { crearSolicitudVacaciones } from "./actions";
+import { crearSolicitudVacaciones, actualizarSolicitudVacaciones } from "./actions";
 
 export function VacacionesForm({
   lideres,
   colaborador,
+  edicion,
 }: {
   lideres: Colaborador[];
   colaborador: Colaborador;
+  edicion?: {
+    solicitudId: string;
+    liderActualId: string;
+    firmaExistente: string;
+    detalle: SolicitudVacacionesDetalle;
+  };
 }) {
   const [error, setError] = useState<string | null>(null);
-  const [fechaDesde, setFechaDesde] = useState("");
+  const [fechaDesde, setFechaDesde] = useState(edicion?.detalle.fecha_desde ?? "");
   const [pending, startTransition] = useTransition();
   const firmaInputRef = useRef<HTMLInputElement>(null);
 
@@ -26,6 +33,7 @@ export function VacacionesForm({
   async function subirFirma(): Promise<string | null> {
     const archivo = firmaInputRef.current?.files?.[0];
     if (!archivo || archivo.size === 0) {
+      if (edicion) return edicion.firmaExistente;
       setError("La firma es obligatoria.");
       return null;
     }
@@ -60,7 +68,9 @@ export function VacacionesForm({
       if (!rutaFirma) return;
 
       formData.set("firma_path", rutaFirma);
-      const res = await crearSolicitudVacaciones(formData);
+      const res = edicion
+        ? await actualizarSolicitudVacaciones(edicion.solicitudId, formData)
+        : await crearSolicitudVacaciones(formData);
       if (res?.error) setError(res.error);
     });
   }
@@ -73,6 +83,8 @@ export function VacacionesForm({
       </div>
     );
   }
+
+  const d = edicion?.detalle;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -100,16 +112,16 @@ export function VacacionesForm({
 
         <div className="form-group">
           <label className="form-label">Área</label>
-          <input name="area" className="form-input" required />
+          <input name="area" className="form-input" required defaultValue={d?.area} />
         </div>
         <div className="form-group">
           <label className="form-label">Cargo actual</label>
-          <input name="cargo_actual" className="form-input" required />
+          <input name="cargo_actual" className="form-input" required defaultValue={d?.cargo_actual} />
         </div>
 
         <div className="form-group">
           <label className="form-label">Tipo de vacaciones</label>
-          <select name="tipo_vacaciones" className="form-select" required defaultValue="">
+          <select name="tipo_vacaciones" className="form-select" required defaultValue={d?.tipo_vacaciones ?? ""}>
             <option value="" disabled>
               Selecciona...
             </option>
@@ -119,7 +131,12 @@ export function VacacionesForm({
         </div>
         <div className="form-group">
           <label className="form-label">Líder de proceso</label>
-          <select name="lider_aprobador_id" className="form-select" required defaultValue="">
+          <select
+            name="lider_aprobador_id"
+            className="form-select"
+            required
+            defaultValue={edicion?.liderActualId ?? ""}
+          >
             <option value="" disabled>
               Selecciona un líder de área...
             </option>
@@ -144,27 +161,41 @@ export function VacacionesForm({
         </div>
         <div className="form-group">
           <label className="form-label">Fecha de descanso — hasta</label>
-          <input name="fecha_hasta" type="date" className="form-input" required />
+          <input name="fecha_hasta" type="date" className="form-input" required defaultValue={d?.fecha_hasta} />
         </div>
 
         <div className="form-group">
           <label className="form-label">Ingreso a laborar</label>
-          <input name="ingreso_a_laborar" type="date" className="form-input" required />
+          <input
+            name="ingreso_a_laborar"
+            type="date"
+            className="form-input"
+            required
+            defaultValue={d?.ingreso_a_laborar}
+          />
         </div>
 
         <div className="form-group form-full">
           <label className="form-label">Observaciones</label>
-          <textarea name="observaciones" className="form-textarea" />
+          <textarea name="observaciones" className="form-textarea" defaultValue={d?.observaciones ?? ""} />
         </div>
 
         <div className="form-group form-full">
-          <label className="form-label">Firma (JPG/JPEG) — obligatoria</label>
-          <input ref={firmaInputRef} type="file" accept="image/jpeg" className="form-input" required />
+          <label className="form-label">
+            Firma (JPG/JPEG){edicion ? " — deja vacío para conservar la actual" : " — obligatoria"}
+          </label>
+          <input
+            ref={firmaInputRef}
+            type="file"
+            accept="image/jpeg"
+            className="form-input"
+            required={!edicion}
+          />
         </div>
       </div>
 
       <button type="submit" className="btn btn-primary" disabled={pending}>
-        {pending ? "Enviando..." : "Enviar solicitud"}
+        {pending ? "Enviando..." : edicion ? "Guardar cambios" : "Enviar solicitud"}
       </button>
     </form>
   );

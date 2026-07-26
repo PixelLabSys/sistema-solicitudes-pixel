@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
 import type { Solicitud } from "@/lib/types";
@@ -60,8 +61,15 @@ export default async function MisSolicitudesPage() {
                 <td className="td-mono">
                   {new Date(s.creado_en).toLocaleDateString("es-CO")}
                 </td>
-                <td>
-                  {s.estado === "pendiente" && <CancelarBoton solicitudId={s.id} />}
+                <td style={{ display: "flex", gap: 8 }}>
+                  {s.estado === "pendiente" && (
+                    <>
+                      <Link href={`/solicitudes/editar/${s.id}`} className="btn btn-ghost btn-sm">
+                        Editar
+                      </Link>
+                      <CancelarBoton solicitudId={s.id} />
+                    </>
+                  )}
                   {urlsPdf.has(s.id) && (
                     <a
                       href={urlsPdf.get(s.id)}

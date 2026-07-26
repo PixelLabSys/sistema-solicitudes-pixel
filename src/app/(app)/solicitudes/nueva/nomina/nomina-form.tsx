@@ -1,16 +1,23 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import type { Colaborador } from "@/lib/types";
+import type { Colaborador, SolicitudNominaDetalle } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import { crearSolicitudNomina } from "./actions";
+import { crearSolicitudNomina, actualizarSolicitudNomina } from "./actions";
 
 export function NominaForm({
   lideres,
   colaborador,
+  edicion,
 }: {
   lideres: Colaborador[];
   colaborador: Colaborador;
+  edicion?: {
+    solicitudId: string;
+    liderActualId: string;
+    firmaExistente: string;
+    detalle: SolicitudNominaDetalle;
+  };
 }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -19,6 +26,7 @@ export function NominaForm({
   async function subirFirma(): Promise<string | null> {
     const archivo = firmaInputRef.current?.files?.[0];
     if (!archivo || archivo.size === 0) {
+      if (edicion) return edicion.firmaExistente;
       setError("La firma es obligatoria.");
       return null;
     }
@@ -53,7 +61,9 @@ export function NominaForm({
       if (!rutaFirma) return;
 
       formData.set("firma_path", rutaFirma);
-      const res = await crearSolicitudNomina(formData);
+      const res = edicion
+        ? await actualizarSolicitudNomina(edicion.solicitudId, formData)
+        : await crearSolicitudNomina(formData);
       if (res?.error) setError(res.error);
     });
   }
@@ -66,6 +76,8 @@ export function NominaForm({
       </div>
     );
   }
+
+  const d = edicion?.detalle;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -87,11 +99,11 @@ export function NominaForm({
 
         <div className="form-group">
           <label className="form-label">Cargo</label>
-          <input name="cargo" className="form-input" required />
+          <input name="cargo" className="form-input" required defaultValue={d?.cargo} />
         </div>
         <div className="form-group">
           <label className="form-label">Tipo de adelanto</label>
-          <select name="tipo_adelanto" className="form-select" required defaultValue="">
+          <select name="tipo_adelanto" className="form-select" required defaultValue={d?.tipo_adelanto ?? ""}>
             <option value="" disabled>
               Selecciona...
             </option>
@@ -103,11 +115,24 @@ export function NominaForm({
 
         <div className="form-group">
           <label className="form-label">Valor neto</label>
-          <input name="valor_neto" type="number" min="1" step="1" className="form-input" required />
+          <input
+            name="valor_neto"
+            type="number"
+            min="1"
+            step="1"
+            className="form-input"
+            required
+            defaultValue={d?.valor_neto}
+          />
         </div>
         <div className="form-group">
           <label className="form-label">Líder de proceso</label>
-          <select name="lider_aprobador_id" className="form-select" required defaultValue="">
+          <select
+            name="lider_aprobador_id"
+            className="form-select"
+            required
+            defaultValue={edicion?.liderActualId ?? ""}
+          >
             <option value="" disabled>
               Selecciona un líder de área...
             </option>
@@ -120,20 +145,33 @@ export function NominaForm({
         </div>
 
         <div className="form-group form-full" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-          <input name="transferencia_bancaria" type="checkbox" id="transferencia" />
+          <input
+            name="transferencia_bancaria"
+            type="checkbox"
+            id="transferencia"
+            defaultChecked={d?.transferencia_bancaria}
+          />
           <label htmlFor="transferencia" className="form-label" style={{ textTransform: "none", letterSpacing: 0, fontFamily: "var(--font)" }}>
             Requiere transferencia bancaria
           </label>
         </div>
 
         <div className="form-group form-full">
-          <label className="form-label">Firma (JPG/JPEG) — obligatoria</label>
-          <input ref={firmaInputRef} type="file" accept="image/jpeg" className="form-input" required />
+          <label className="form-label">
+            Firma (JPG/JPEG){edicion ? " — deja vacío para conservar la actual" : " — obligatoria"}
+          </label>
+          <input
+            ref={firmaInputRef}
+            type="file"
+            accept="image/jpeg"
+            className="form-input"
+            required={!edicion}
+          />
         </div>
       </div>
 
       <button type="submit" className="btn btn-primary" disabled={pending}>
-        {pending ? "Enviando..." : "Enviar solicitud"}
+        {pending ? "Enviando..." : edicion ? "Guardar cambios" : "Enviar solicitud"}
       </button>
     </form>
   );
