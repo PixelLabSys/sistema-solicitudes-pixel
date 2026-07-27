@@ -33,7 +33,18 @@
       "Bash(npx tsx *)",
       "Bash(npx --yes vercel --version)",
       "Bash(npx vercel *)",
-      "Bash(mkdir -p \"/Users/alejandromorales/Desktop/PROYECTOS CLAUDE/PIXEL CLAUDE/SISTEMA SOLICITUDES/src/app/\\(app\\)/solicitudes/editar/[id]\")"
+      "Bash(mkdir -p \"/Users/alejandromorales/Desktop/PROYECTOS CLAUDE/PIXEL CLAUDE/SISTEMA SOLICITUDES/src/app/\\(app\\)/solicitudes/editar/[id]\")",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "Bash(curl -sL https://github.com/cli/cli/releases/latest/download/gh_2.63.2_macOS_arm64.zip -o gh.zip)",
+      "Bash(curl -sL -o /dev/null -w \"%{url_effective}\\\\n\" https://github.com/cli/cli/releases/latest)",
+      "Bash(curl -sL https://github.com/cli/cli/releases/download/v2.96.0/gh_2.96.0_macOS_arm64.zip -o gh.zip)",
+      "Bash(unzip -o gh.zip -d gh_extracted)",
+      "Bash(/tmp/gh_extracted/gh_2.96.0_macOS_arm64/bin/gh auth *)",
+      "Bash(/tmp/gh_extracted/gh_2.96.0_macOS_arm64/bin/gh repo *)",
+      "Bash(git branch *)",
+      "Bash(git push *)"
     ]
   }
 }
