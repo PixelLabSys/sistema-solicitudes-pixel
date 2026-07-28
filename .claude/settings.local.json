@@ -54,7 +54,9 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://sistema-solicitudes-pixel.vercel.app/login)",
       "Bash(npm audit *)",
       "Bash(npm uninstall *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://sistema-solicitudes-pixel.vercel.app/login)",
+      "Bash(curl -s \"https://api.resend.com/emails\" -H \"Authorization: Bearer re_EwhTGZPg_DFaiCkN7QTVbiyztESYjg7bU\")"
     ]
   }
 }

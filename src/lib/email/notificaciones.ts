@@ -10,11 +10,12 @@ const TIPO_LABEL: Record<Solicitud["tipo"], string> = {
   nomina: "Adelanto de Nómina",
 };
 
-async function registrarFallo(supabase: SupabaseServerClient, solicitudId: string) {
-  await supabase.from("solicitud_evento").insert({
-    solicitud_id: solicitudId,
-    evento: "email_fallido",
-  });
+async function registrarEvento(
+  supabase: SupabaseServerClient,
+  solicitudId: string,
+  evento: "email_fallido" | "notificada_th"
+) {
+  await supabase.from("solicitud_evento").insert({ solicitud_id: solicitudId, evento });
 }
 
 export async function notificarNuevaSolicitud(
@@ -24,7 +25,7 @@ export async function notificarNuevaSolicitud(
   lider: Colaborador
 ) {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: REMITENTE,
       to: lider.correo,
       subject: `Nueva solicitud pendiente: ${solicitud.consecutivo}`,
@@ -34,8 +35,9 @@ export async function notificarNuevaSolicitud(
         <p>Ingresa al Sistema de Solicitudes para revisarla y aprobarla o rechazarla.</p>
       `,
     });
+    if (error) await registrarEvento(supabase, solicitud.id, "email_fallido");
   } catch {
-    await registrarFallo(supabase, solicitud.id);
+    await registrarEvento(supabase, solicitud.id, "email_fallido");
   }
 }
 
@@ -47,7 +49,7 @@ export async function notificarDecision(
   motivo?: string
 ) {
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: REMITENTE,
       to: colaborador.correo,
       subject: `Tu solicitud ${solicitud.consecutivo} fue ${estadoFinal}`,
@@ -58,8 +60,9 @@ export async function notificarDecision(
         <p>Ingresa al Sistema de Solicitudes para ver el detalle y descargar el PDF.</p>
       `,
     });
+    if (error) await registrarEvento(supabase, solicitud.id, "email_fallido");
   } catch {
-    await registrarFallo(supabase, solicitud.id);
+    await registrarEvento(supabase, solicitud.id, "email_fallido");
   }
 }
 
@@ -77,7 +80,7 @@ export async function notificarLiderTH(
   if (!lideresTh || lideresTh.length === 0) return;
 
   try {
-    await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: REMITENTE,
       to: (lideresTh as Colaborador[]).map((l) => l.correo),
       subject: `Solicitud aprobada: ${solicitud.consecutivo}`,
@@ -88,11 +91,12 @@ export async function notificarLiderTH(
       `,
     });
 
-    await supabase.from("solicitud_evento").insert({
-      solicitud_id: solicitud.id,
-      evento: "notificada_th",
-    });
+    if (error) {
+      await registrarEvento(supabase, solicitud.id, "email_fallido");
+    } else {
+      await registrarEvento(supabase, solicitud.id, "notificada_th");
+    }
   } catch {
-    await registrarFallo(supabase, solicitud.id);
+    await registrarEvento(supabase, solicitud.id, "email_fallido");
   }
 }
