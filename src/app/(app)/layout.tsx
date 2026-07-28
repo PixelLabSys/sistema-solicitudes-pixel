@@ -52,9 +52,10 @@ export default async function AppLayout({
   return (
     <div className="app">
       <aside className="sidebar">
-        <div className="logo-area">
-          <p className="logo-name">PIXEL GRAPHIC</p>
-          <p className="logo-sub">Sistema de solicitudes</p>
+        <div className="logo-area" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/pixel-logo-inv.png" alt="Pixel Graphic" style={{ height: 47, width: "auto", display: "block" }} />
+          <p className="logo-sub" style={{ marginTop: 8 }}>Sistema de solicitudes</p>
         </div>
         <NavSidebar
           esLiderArea={colaborador.es_lider_area}

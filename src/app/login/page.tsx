@@ -55,12 +55,13 @@ export default function LoginPage() {
           boxShadow: "0 24px 64px rgba(0,0,0,.4)",
         }}
       >
-        <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
-          Sistema de Solicitudes
-        </p>
-        <p style={{ fontSize: 12, color: "var(--text3)", marginBottom: 24 }}>
-          PIXEL GRAPHIC SAS
-        </p>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/pixel-logo-inv.png" alt="Pixel Graphic" style={{ height: 65, width: "auto", display: "block", marginBottom: 12 }} />
+          <p style={{ fontSize: 12, color: "var(--text3)", marginBottom: 24 }}>
+            Sistema de Solicitudes
+          </p>
+        </div>
 
         {(mensajeError || mensajeErrorUrl) && (
           <div
