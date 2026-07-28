@@ -48,14 +48,14 @@ Un mismo colaborador puede tener varios roles simultáneamente (ej. ser Líder d
 4. **Notificaciones** — envío de correos en cada cambio de estado.
 5. **Generación de PDF** — formato final con firma incrustada.
 6. **Dashboard TH** — historial, filtros, exportación (a definir en SDD).
-7. **Configuración** — gestión de colaboradores, líderes, líder de TH.
+7. **Configuración** — gestión de colaboradores (alta individual o importación masiva desde Excel), líderes, líder de TH.
 
 ## 7. Recorridos principales
 - **Radicar solicitud**: colaborador inicia sesión → elige tipo → llena formulario → sube firma → envía.
 - **Aprobar/rechazar**: líder recibe notificación → revisa → aprueba o rechaza con nota → sistema notifica al colaborador.
 - **Cierre del ciclo**: si aprobado, Líder de TH recibe notificación y la solicitud queda visible en el dashboard.
 - **Consulta histórica**: Líder de TH entra al dashboard, filtra por colaborador/tipo/estado/fecha.
-- **Configuración**: Líder de TH agrega/elimina colaboradores y asigna roles de líder.
+- **Configuración**: Líder de TH agrega/elimina colaboradores (uno por uno o en bloque vía Excel) y asigna roles de líder.
 
 ## 8. Historias de usuario (jobs to be done)
 - Como colaborador, quiero radicar una solicitud de permiso/vacaciones/adelanto sin papeleo físico, para que quede registrada y trazable.
