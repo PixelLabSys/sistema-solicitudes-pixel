@@ -38,6 +38,42 @@ export async function crearColaborador(formData: FormData) {
   return { error: null };
 }
 
+export async function importarColaboradores(
+  filas: { nombre_completo: string; correo: string; cc: string }[]
+) {
+  await requireLiderTh();
+  const supabase = await createClient();
+
+  let creados = 0;
+  const saltados: { correo: string; motivo: string }[] = [];
+
+  for (const fila of filas) {
+    const nombre_completo = fila.nombre_completo?.trim();
+    const correo = fila.correo?.trim().toLowerCase();
+    const cc = fila.cc?.trim();
+
+    if (!nombre_completo || !correo || !cc) {
+      saltados.push({ correo: correo || "(sin correo)", motivo: "Faltan datos obligatorios." });
+      continue;
+    }
+
+    const { error } = await supabase.from("colaborador").insert({ nombre_completo, correo, cc });
+
+    if (error) {
+      saltados.push({
+        correo,
+        motivo: error.message.includes("duplicate") ? "Ese correo ya está registrado." : error.message,
+      });
+      continue;
+    }
+
+    creados++;
+  }
+
+  revalidatePath("/configuracion");
+  return { creados, saltados };
+}
+
 export async function actualizarRoles(
   colaboradorId: string,
   cambios: { es_lider_area?: boolean; es_lider_th?: boolean }

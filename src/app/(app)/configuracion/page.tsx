@@ -4,6 +4,7 @@ import { getColaboradorActual } from "@/lib/data/colaborador-actual";
 import type { Colaborador } from "@/lib/types";
 import { ColaboradorForm } from "./colaborador-form";
 import { ColaboradorRow } from "./colaborador-row";
+import { ImportarExcelForm } from "./importar-excel-form";
 
 export default async function ConfiguracionPage() {
   const yo = await getColaboradorActual();
@@ -34,6 +35,13 @@ export default async function ConfiguracionPage() {
           Nuevo colaborador
         </p>
         <ColaboradorForm />
+      </div>
+
+      <div className="card" style={{ marginBottom: 24 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 14 }}>
+          Importar colaboradores desde Excel
+        </p>
+        <ImportarExcelForm />
       </div>
 
       <div className="table-wrap">

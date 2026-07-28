@@ -44,7 +44,17 @@
       "Bash(/tmp/gh_extracted/gh_2.96.0_macOS_arm64/bin/gh auth *)",
       "Bash(/tmp/gh_extracted/gh_2.96.0_macOS_arm64/bin/gh repo *)",
       "Bash(git branch *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(mkdir -p ~/bin)",
+      "Bash(curl -sL https://github.com/cli/cli/releases/download/v2.96.0/gh_2.96.0_macOS_arm64.zip -o gh2.zip)",
+      "Bash(unzip -o gh2.zip -d gh_extracted2)",
+      "Bash(cp gh_extracted2/gh_2.96.0_macOS_arm64/bin/gh ~/bin/gh)",
+      "Bash(chmod +x ~/bin/gh)",
+      "Bash(~/bin/gh auth *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" https://sistema-solicitudes-pixel.vercel.app/login)",
+      "Bash(npm audit *)",
+      "Bash(npm uninstall *)",
+      "Bash(node -e ' *)"
     ]
   }
 }
