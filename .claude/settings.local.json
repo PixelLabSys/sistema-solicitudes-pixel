@@ -56,7 +56,16 @@
       "Bash(npm uninstall *)",
       "Bash(node -e ' *)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://sistema-solicitudes-pixel.vercel.app/login)",
-      "Bash(curl -s \"https://api.resend.com/emails\" -H \"Authorization: Bearer re_EwhTGZPg_DFaiCkN7QTVbiyztESYjg7bU\")"
+      "Bash(curl -s \"https://api.resend.com/emails\" -H \"Authorization: Bearer re_EwhTGZPg_DFaiCkN7QTVbiyztESYjg7bU\")",
+      "Bash(curl -s \"https://api.resend.com/domains\" -H \"Authorization: Bearer re_EwhTGZPg_DFaiCkN7QTVbiyztESYjg7bU\")",
+      "Bash(dig +short TXT resend._domainkey.pixel-g.com)",
+      "Bash(dig +short TXT send.pixel-g.com)",
+      "Bash(dig +short MX send.pixel-g.com)",
+      "Bash(dig +short TXT _dmarc.pixel-g.com)",
+      "Bash(dig +short TXT resend._domainkey.pxl-g.com)",
+      "Bash(dig +short TXT send.pxl-g.com)",
+      "Bash(dig +short MX send.pxl-g.com)",
+      "Bash(curl -s -X POST https://api.resend.com/emails -H 'Authorization: Bearer re_RSW8WxDr_C12CeQhEmFtraCHr7iq9BgwL' -H 'Content-Type: application/json' -d '{ *)"
     ]
   }
 }
