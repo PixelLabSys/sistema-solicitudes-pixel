@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import type { Colaborador } from "@/lib/types";
 
-export function FiltrosDashboard() {
+export function FiltrosDashboard({ colaboradores }: { colaboradores: Colaborador[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -14,7 +15,19 @@ export function FiltrosDashboard() {
   }
 
   return (
-    <div style={{ display: "flex", gap: 8 }}>
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <select
+        className="form-select"
+        defaultValue={searchParams.get("colaborador_id") ?? ""}
+        onChange={(e) => setFiltro("colaborador_id", e.target.value)}
+      >
+        <option value="">Todos los colaboradores</option>
+        {colaboradores.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.nombre_completo}
+          </option>
+        ))}
+      </select>
       <select
         className="form-select"
         defaultValue={searchParams.get("tipo") ?? ""}
@@ -36,6 +49,22 @@ export function FiltrosDashboard() {
         <option value="rechazada">Rechazada</option>
         <option value="cancelada">Cancelada</option>
       </select>
+      <input
+        type="date"
+        className="form-input"
+        style={{ width: "auto" }}
+        defaultValue={searchParams.get("desde") ?? ""}
+        onChange={(e) => setFiltro("desde", e.target.value)}
+        title="Radicada desde"
+      />
+      <input
+        type="date"
+        className="form-input"
+        style={{ width: "auto" }}
+        defaultValue={searchParams.get("hasta") ?? ""}
+        onChange={(e) => setFiltro("hasta", e.target.value)}
+        title="Radicada hasta"
+      />
     </div>
   );
 }

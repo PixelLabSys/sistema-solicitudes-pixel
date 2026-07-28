@@ -8,17 +8,30 @@ import { FiltrosDashboard } from "./filtros-dashboard";
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tipo?: string; estado?: string }>;
+  searchParams: Promise<{ tipo?: string; estado?: string; colaborador_id?: string; desde?: string; hasta?: string }>;
 }) {
   const yo = await getColaboradorActual();
   if (!yo || (!yo.es_lider_th && !yo.es_lider_area)) redirect("/");
 
-  const { tipo, estado } = await searchParams;
+  const { tipo, estado, colaborador_id, desde, hasta } = await searchParams;
   const supabase = await createClient();
+
+  // Solicitudes visibles sin filtrar, para poblar el desplegable de colaboradores
+  // (RLS ya limita esto al alcance del líder de área o a todo para TH).
+  const { data: solicitudesVisibles } = await supabase.from("solicitud").select("colaborador_id");
+  const colaboradorIdsVisibles = [...new Set((solicitudesVisibles ?? []).map((s) => s.colaborador_id))];
+  const { data: colaboradoresDisponibles } = await supabase
+    .from("colaborador")
+    .select("*")
+    .in("id", colaboradorIdsVisibles.length ? colaboradorIdsVisibles : ["00000000-0000-0000-0000-000000000000"])
+    .order("nombre_completo");
 
   let query = supabase.from("solicitud").select("*").order("creado_en", { ascending: false });
   if (tipo) query = query.eq("tipo", tipo as TipoSolicitud);
   if (estado) query = query.eq("estado", estado as EstadoSolicitud);
+  if (colaborador_id) query = query.eq("colaborador_id", colaborador_id);
+  if (desde) query = query.gte("creado_en", desde);
+  if (hasta) query = query.lte("creado_en", hasta + "T23:59:59");
 
   const { data: solicitudes } = await query;
   const lista = (solicitudes ?? []) as Solicitud[];
@@ -74,7 +87,7 @@ export default async function DashboardPage({
 
       <div className="table-wrap">
         <div className="table-header">
-          <FiltrosDashboard />
+          <FiltrosDashboard colaboradores={(colaboradoresDisponibles ?? []) as Colaborador[]} />
         </div>
         <table>
           <thead>
