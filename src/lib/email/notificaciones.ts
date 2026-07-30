@@ -1,4 +1,5 @@
 import { resend, REMITENTE } from "./resend";
+import { plantillaCorreo } from "./plantilla";
 import type { createClient } from "@/lib/supabase/server";
 import type { Colaborador, Solicitud } from "@/lib/types";
 
@@ -25,15 +26,21 @@ export async function notificarNuevaSolicitud(
   lider: Colaborador
 ) {
   try {
+    const html = plantillaCorreo({
+      eyebrow: `${TIPO_LABEL[solicitud.tipo]} · ${solicitud.consecutivo}`,
+      titulo: "Tienes una solicitud pendiente de aprobación",
+      parrafosHtml: `
+        <p style="margin:0 0 12px 0;"><strong style="color:#0b1b29;">${colaborador.nombre_completo}</strong> radicó una solicitud de ${TIPO_LABEL[solicitud.tipo]} y te eligió como líder de proceso.</p>
+        <p style="margin:0;">Ingresa para revisarla y aprobarla o rechazarla.</p>
+      `,
+      ctaTexto: "Revisar solicitud",
+    });
+
     const { error } = await resend.emails.send({
       from: REMITENTE,
       to: lider.correo,
       subject: `Nueva solicitud pendiente: ${solicitud.consecutivo}`,
-      html: `
-        <h2>Tienes una solicitud pendiente de aprobación</h2>
-        <p><strong>${colaborador.nombre_completo}</strong> radicó una solicitud de ${TIPO_LABEL[solicitud.tipo]} (${solicitud.consecutivo}) y te eligió como líder de proceso.</p>
-        <p>Ingresa al Sistema de Solicitudes para revisarla y aprobarla o rechazarla.</p>
-      `,
+      html,
     });
     if (error) await registrarEvento(supabase, solicitud.id, "email_fallido");
   } catch {
@@ -49,16 +56,28 @@ export async function notificarDecision(
   motivo?: string
 ) {
   try {
+    const aprobada = estadoFinal === "aprobada";
+    const html = plantillaCorreo({
+      eyebrow: `${TIPO_LABEL[solicitud.tipo]} · ${solicitud.consecutivo}`,
+      titulo: aprobada ? "Tu solicitud fue aprobada" : "Tu solicitud fue rechazada",
+      colorEyebrow: aprobada ? "#3fb950" : "#f85149",
+      parrafosHtml: `
+        <p style="margin:0 0 12px 0;">Tu solicitud de ${TIPO_LABEL[solicitud.tipo]} <strong style="color:#0b1b29;">${solicitud.consecutivo}</strong> fue ${estadoFinal}.</p>
+        ${
+          !aprobada && motivo
+            ? `<p style="margin:0 0 12px 0; padding:12px 14px; background:#fef2f2; border-radius:8px; color:#991b1b;">Motivo: ${motivo}</p>`
+            : ""
+        }
+        <p style="margin:0;">Ingresa para ver el detalle y descargar el PDF.</p>
+      `,
+      ctaTexto: "Ver mi solicitud",
+    });
+
     const { error } = await resend.emails.send({
       from: REMITENTE,
       to: colaborador.correo,
       subject: `Tu solicitud ${solicitud.consecutivo} fue ${estadoFinal}`,
-      html: `
-        <h2>Tu solicitud de ${TIPO_LABEL[solicitud.tipo]} fue ${estadoFinal}</h2>
-        <p>Consecutivo: <strong>${solicitud.consecutivo}</strong></p>
-        ${estadoFinal === "rechazada" && motivo ? `<p>Motivo: ${motivo}</p>` : ""}
-        <p>Ingresa al Sistema de Solicitudes para ver el detalle y descargar el PDF.</p>
-      `,
+      html,
     });
     if (error) await registrarEvento(supabase, solicitud.id, "email_fallido");
   } catch {
@@ -80,15 +99,22 @@ export async function notificarLiderTH(
   if (!lideresTh || lideresTh.length === 0) return;
 
   try {
+    const html = plantillaCorreo({
+      eyebrow: `${TIPO_LABEL[solicitud.tipo]} · ${solicitud.consecutivo}`,
+      titulo: "Solicitud aprobada",
+      colorEyebrow: "#3fb950",
+      parrafosHtml: `
+        <p style="margin:0 0 12px 0;"><strong style="color:#0b1b29;">${colaborador.nombre_completo}</strong> tuvo su solicitud de ${TIPO_LABEL[solicitud.tipo]} aprobada.</p>
+        <p style="margin:0;">Ya está visible en el Dashboard de historial.</p>
+      `,
+      ctaTexto: "Ver Dashboard",
+    });
+
     const { error } = await resend.emails.send({
       from: REMITENTE,
       to: (lideresTh as Colaborador[]).map((l) => l.correo),
       subject: `Solicitud aprobada: ${solicitud.consecutivo}`,
-      html: `
-        <h2>Solicitud aprobada</h2>
-        <p><strong>${colaborador.nombre_completo}</strong> tuvo su solicitud de ${TIPO_LABEL[solicitud.tipo]} (${solicitud.consecutivo}) aprobada.</p>
-        <p>Ya está visible en el Dashboard de historial.</p>
-      `,
+      html,
     });
 
     if (error) {
