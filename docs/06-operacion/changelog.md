@@ -1,5 +1,24 @@
 # Changelog — Sistema de Solicitudes PIXEL GRAPHIC
 
+## v1.1 — Mejoras post-entrega (2026-08-04)
+
+Feedback recibido tras la presentación y entrega inicial al cliente.
+
+**Nuevo:**
+- **Soporte adjunto en Permiso**: archivo opcional (PDF/JPG/PNG, máx. 5MB) para justificar la solicitud (ej. cita médica, cita en colegio).
+- **Vacaciones mixtas**: nuevo tipo que combina días disfrutados y compensados, con selector de "días a compensar" (1 a 30) independiente del rango de fechas.
+- **Catálogos de Área y Cargo**: reemplazan los campos de texto libre en Vacaciones y Permiso por desplegables configurables (con opción "Crear nueva" inline desde cualquier formulario). Editables/desactivables desde Configuración. Las solicitudes ya radicadas conservan el nombre histórico aunque el catálogo cambie después (snapshot, no referencia viva).
+- **Vista previa en Bandeja de Aprobación**: cada tarjeta pendiente tiene un ícono "Ver solicitud" (PDF generado al vuelo, sin persistir) y, si aplica, "Ver soporte" para revisar el archivo adjunto antes de decidir.
+- **Múltiples Líderes de TH**: se elimina la restricción de unicidad — ahora puede haber varias personas con ese rol simultáneamente, como redundancia operativa.
+- **Área y Cargo en Permiso**: se agregaron también estos dos campos (antes solo estaban en Vacaciones), con el mismo patrón de catálogo + creación inline.
+- **Nombres de archivo legibles**: los PDF descargados desde "Mis solicitudes" y el Dashboard ahora se guardan como `SP-####.pdf` / `SV-####.pdf` / `SN-####.pdf` en vez del identificador interno (UUID).
+
+**Decisiones técnicas:**
+- Igual que con área/cargo de Vacaciones, los nuevos campos de Permiso son texto congelado al radicar (no FK viva) — consistente con el principio de snapshot histórico ya usado en el resto del sistema.
+- La vista previa de PDF pendiente es una ruta de solo lectura que genera el documento en cada solicitud sin escribir en `pdf_url` — ese campo solo se llena en el momento oficial de la decisión.
+
+**Datos de prueba:** se eliminaron todas las solicitudes de prueba y el colaborador de prueba "Camila Ríos" antes de la segunda presentación al cliente; los consecutivos (SP/SV/SN) se reiniciaron en 0001.
+
 ## v1.0 — Entrega inicial (2026-07-28)
 
 **Funcionalidad completa:**

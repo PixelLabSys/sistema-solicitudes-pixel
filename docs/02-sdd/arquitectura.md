@@ -130,7 +130,7 @@ erDiagram
 
 Notas:
 - No existe `colaborador.lider_id`: el líder de proceso no es fijo por colaborador. Cada `SOLICITUD` guarda su propio `lider_aprobador_id`, elegido por el colaborador de un desplegable con todos los `colaborador` donde `es_lider_area=true`, en el momento de radicar. Puede variar de una solicitud a otra.
-- `es_lider_th` debería ser único = true para un solo colaborador a la vez (se valida en aplicación, no a nivel de constraint, para simplicidad del MVP).
+- `es_lider_th` puede ser true para varios colaboradores simultáneamente — se removió la restricción de unicidad para permitir redundancia (varios Líderes de TH como respaldo entre sí) (v1.1).
 - `SOLICITUD_EVENTO` es la tabla de auditoría/trazabilidad que alimenta el dashboard de historial.
 - El consecutivo se genera con una secuencia por tipo (`SP`, `SV`, `SN`) que nunca se reinicia ni se reutiliza (ver reglas de negocio).
 
@@ -176,7 +176,7 @@ No hay estados intermedios de revisión en el MVP. Mientras está en Pendiente, 
 
 **En Server Action / frontend (UX, no la garantía de seguridad):**
 - El formulario captura `lider_aprobador_id` de un desplegable poblado con `colaborador` donde `es_lider_area=true`, excluyendo siempre al colaborador autenticado. Si no hay ninguno elegible, bloquea el envío con mensaje explicativo.
-- Área y Cargo (Vacaciones/Nómina) son campos de texto libre en `SOLICITUD_VACACIONES`/`SOLICITUD_NOMINA`; no existen como columnas en `COLABORADOR`.
+- Área y Cargo (Permiso/Vacaciones/Nómina) se eligen de las tablas catálogo `AREA`/`CARGO` (con soft-delete vía `activo`), pero se guardan como texto congelado en `SOLICITUD_PERMISO`/`SOLICITUD_VACACIONES`/`SOLICITUD_NOMINA` al momento de radicar — no son FK vivas ni existen como columnas en `COLABORADOR` (v1.1).
 - Vacaciones: si `fecha_desde - creado_en < 45 días`, se guarda `advertencia_45_dias = true` pero no se bloquea el insert.
 - Firma (`firma_url`) es obligatoria para pasar de borrador a "Pendiente" (no existe estado borrador persistido en el MVP — se valida en frontend antes de enviar).
 - Solo se puede transicionar a `cancelada` desde `pendiente`, y solo por el propio `colaborador_id` de la solicitud (reforzado también por RLS de fila).

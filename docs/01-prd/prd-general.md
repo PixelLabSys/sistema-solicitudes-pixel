@@ -75,7 +75,7 @@ Un mismo colaborador puede tener varios roles simultáneamente (ej. ser Líder d
 - Un colaborador puede tener múltiples roles (ej. líder de área + solicitante).
 - La firma es obligatoria para completar/enviar cualquier solicitud.
 - El PDF generado se almacena en el sistema (descargable después) y adicionalmente se envía por correo en cada notificación relevante.
-- Área y Cargo (en Vacaciones/Nómina) son campos de texto libre que el colaborador escribe cada vez que llena el formulario; no se guardan en su perfil ni se precargan.
+- Área y Cargo (en Permiso/Vacaciones/Nómina) se eligen de un catálogo configurable (con opción de crear uno nuevo inline); cada solicitud congela el nombre elegido al momento de radicar — no se guardan en el perfil del colaborador ni se actualizan retroactivamente si el catálogo cambia después (v1.1).
 - Un colaborador no puede elegir su propio nombre como líder de proceso en el desplegable (autoaprobación bloqueada), aunque sea también líder de área.
 - Una solicitud en estado Pendiente puede ser editada o cancelada por el propio colaborador que la radicó. Una vez Aprobada o Rechazada, queda inmutable.
 - Retención: las solicitudes y sus PDFs se conservan indefinidamente por defecto (son documentos laborales); no hay borrado automático. Solo un Líder de TH podría archivar/eliminar manualmente en el futuro (fuera del MVP).

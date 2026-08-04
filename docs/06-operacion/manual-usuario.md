@@ -6,10 +6,15 @@ Entra a **https://sistema-solicitudes-pixel.vercel.app** y haz clic en "Iniciar 
 ## Radicar una solicitud (todo colaborador)
 1. En el menú lateral, elige **Nueva: Permiso**, **Nueva: Vacaciones** o **Nueva: Adelanto**.
 2. Llena el formulario. El **líder de proceso** se elige de un desplegable con los líderes de área activos — puedes elegir uno distinto cada vez, según el caso.
-3. Adjunta tu **firma** (imagen JPG/JPEG, máx. 2MB) — es obligatoria.
-4. Envía. El sistema asigna el consecutivo automáticamente (SP-####, SV-#### o SN-####).
+3. En Permiso y Vacaciones, elige tu **Área** y **Cargo actual** de un desplegable. Si el tuyo no aparece en la lista, selecciona "+ Crear nuevo..." y agrégalo ahí mismo — queda disponible para todos desde ese momento.
+4. Adjunta tu **firma** (imagen JPG/JPEG, máx. 2MB) — es obligatoria.
+5. Envía. El sistema asigna el consecutivo automáticamente (SP-####, SV-#### o SN-####).
 
 **Vacaciones**: si radicas con menos de 45 días de anticipación, verás una advertencia pero puedes continuar — la decisión final la toman tu líder y Talento Humano.
+
+**Permiso — soporte adjunto**: puedes adjuntar opcionalmente un PDF, JPG o PNG (máx. 5MB) como soporte de tu solicitud (ej. cita médica, cita en colegio). No es obligatorio.
+
+**Vacaciones — tipo Mixtas**: además de "Compensadas" y "Disfrutadas", puedes elegir "Mixtas": una parte de días disfrutados y otra parte compensada. Al seleccionarla, aparece un desplegable "Días a compensar" (1 a 30) — el resto del periodo se entiende como disfrutado.
 
 ## Mientras tu solicitud está "Pendiente"
 En **Mis solicitudes** puedes:
@@ -20,6 +25,8 @@ Una vez el líder decide (Aprobada/Rechazada), la solicitud queda inmutable — 
 
 ## Aprobar o rechazar (líderes de área)
 En **Bandeja de aprobación** ves las solicitudes donde te eligieron como líder de proceso.
+- **👁 Ver solicitud**: abre una vista previa en PDF de la solicitud completa, sin necesidad de decidir primero.
+- **👁 Ver soporte**: solo aparece si el colaborador adjuntó un archivo de soporte (Permiso) — lo abre en una pestaña nueva.
 - **Aprobar**: un clic. Genera el PDF final y notifica al colaborador y a Talento Humano.
 - **Rechazar**: requiere escribir un motivo obligatorio antes de confirmar.
 
@@ -32,7 +39,8 @@ En **Bandeja de aprobación** ves las solicitudes donde te eligieron como líder
 ## Configuración (solo Líder de Talento Humano)
 - **Alta individual**: formulario con Nombre completo, Correo, CC.
 - **Importar desde Excel**: sube un archivo `.xlsx`/`.csv` con columnas **Nombre Completo**, **Correo**, **CC** (los encabezados no distinguen mayúsculas/acentos). El sistema reporta cuántos se crearon y cuáles se saltaron (y por qué).
-- **Roles**: marca/desmarca "Líder de área" o "Líder de TH" con las casillas. Solo puede haber un Líder de TH activo a la vez.
+- **Áreas y Cargos**: catálogos editables que alimentan los desplegables de "Área" y "Cargo actual" en los formularios de solicitud. Puedes agregar, renombrar o desactivar cada uno. Si renombras o desactivas un área/cargo, las solicitudes ya radicadas conservan el nombre histórico tal como se escribió al momento de radicar — no cambian retroactivamente.
+- **Roles**: marca/desmarca "Líder de área" o "Líder de TH" con las casillas. Ahora puede haber **varios Líderes de TH al mismo tiempo** (redundancia/respaldo entre sí, por si uno no está disponible).
 - **Desactivar/quitar rol**: si el colaborador tiene solicitudes **pendientes** asignadas como líder, el sistema bloquea la acción hasta que se resuelvan.
 - "Desactivar" nunca borra al colaborador — solo lo marca inactivo (no puede iniciar sesión, pero su historial se conserva).
 

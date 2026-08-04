@@ -54,3 +54,20 @@ Se encontró que las API keys de Resend quedaron expuestas temporalmente en un a
 Este documento certifica que el sistema fue revisado y probado en vivo con datos reales por Alejo Morales, cubriendo el flujo completo de los 3 tipos de solicitud con al menos dos usuarios distintos (colaborador y líder de aprobación).
 
 Firma / aceptación: ___________________________  Fecha: ___________
+
+---
+
+## 8. Anexo — Actualización v1.1 (2026-08-04)
+
+Tras la primera presentación al cliente, se recibieron 5 puntos de mejora que fueron construidos, probados en vivo y desplegados a producción. Detalle completo en `docs/06-operacion/changelog.md` (v1.1). Resumen:
+
+| Mejora | Estado |
+|---|---|
+| Soporte adjunto (PDF/JPG/PNG) en Solicitud de Permiso | ✅ Entregado |
+| Vacaciones mixtas (disfrutadas + compensadas, con días a compensar) | ✅ Entregado |
+| Catálogos editables de Área y Cargo, con creación inline | ✅ Entregado |
+| Vista previa de PDF y soporte en Bandeja de Aprobación | ✅ Entregado |
+| Múltiples Líderes de Talento Humano (redundancia) | ✅ Entregado |
+| Área y Cargo también en Solicitud de Permiso | ✅ Entregado |
+
+Antes de la segunda presentación se eliminaron todas las solicitudes de prueba, el colaborador de prueba "Camila Ríos" y se reiniciaron los consecutivos (SP/SV/SN) en 0001, dejando el sistema con los 20 colaboradores reales y sin historial de pruebas.
