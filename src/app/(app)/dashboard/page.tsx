@@ -48,7 +48,9 @@ export default async function DashboardPage({
   const urlsPdf = new Map<string, string>();
   for (const s of lista) {
     if (s.pdf_url) {
-      const { data } = await supabase.storage.from("pdfs").createSignedUrl(s.pdf_url, 300);
+      const { data } = await supabase.storage
+        .from("pdfs")
+        .createSignedUrl(s.pdf_url, 300, { download: `${s.consecutivo}.pdf` });
       if (data?.signedUrl) urlsPdf.set(s.id, data.signedUrl);
     }
   }

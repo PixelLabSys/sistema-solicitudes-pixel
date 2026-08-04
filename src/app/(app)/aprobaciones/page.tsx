@@ -38,6 +38,14 @@ export default async function AprobacionesPage() {
   const mapaVacaciones = new Map((vacaciones ?? []).map((v) => [v.solicitud_id, v]));
   const mapaNominas = new Map((nominas ?? []).map((n) => [n.solicitud_id, n]));
 
+  const mapaSoportes = new Map<string, string>();
+  for (const p of permisos ?? []) {
+    if (p.soporte_url) {
+      const { data } = await supabase.storage.from("soportes").createSignedUrl(p.soporte_url, 300);
+      if (data?.signedUrl) mapaSoportes.set(p.solicitud_id, data.signedUrl);
+    }
+  }
+
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
@@ -64,6 +72,7 @@ export default async function AprobacionesPage() {
               permiso={mapaPermisos.get(s.id)}
               vacaciones={mapaVacaciones.get(s.id)}
               nomina={mapaNominas.get(s.id)}
+              urlSoporte={mapaSoportes.get(s.id)}
             />
           ))}
         </div>

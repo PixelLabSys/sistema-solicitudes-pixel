@@ -27,6 +27,8 @@ const TITULOS: Record<Solicitud["tipo"], string> = {
 
 function camposPermiso(d: SolicitudPermisoDetalle): [string, string][] {
   return [
+    ["Área", d.area || "—"],
+    ["Cargo actual", d.cargo_actual || "—"],
     ["Fecha desde", d.fecha_desde],
     ["Fecha hasta", d.fecha_hasta],
     ["Hora desde", d.hora_desde],
@@ -35,20 +37,32 @@ function camposPermiso(d: SolicitudPermisoDetalle): [string, string][] {
     ["Horas concedidas", String(d.horas_concedidas)],
     ["Tipo de permiso", d.tipo_permiso === "medico" ? "Médico" : "Personal"],
     ["Descripción", d.descripcion || "—"],
+    ["Soporte adjunto", d.soporte_url ? "Sí" : "No"],
   ];
 }
 
 function camposVacaciones(d: SolicitudVacacionesDetalle): [string, string][] {
-  return [
+  const tiposLabel: Record<string, string> = {
+    compensadas: "Compensadas",
+    disfrutadas: "Disfrutadas",
+    mixtas: "Mixtas",
+  };
+  const campos: [string, string][] = [
     ["Área", d.area],
     ["Cargo actual", d.cargo_actual],
-    ["Tipo de vacaciones", d.tipo_vacaciones === "compensadas" ? "Compensadas" : "Disfrutadas"],
+    ["Tipo de vacaciones", tiposLabel[d.tipo_vacaciones] ?? d.tipo_vacaciones],
+  ];
+  if (d.tipo_vacaciones === "mixtas" && d.dias_compensados) {
+    campos.push(["Días a compensar", String(d.dias_compensados)]);
+  }
+  campos.push(
     ["Fecha desde", d.fecha_desde],
     ["Fecha hasta", d.fecha_hasta],
     ["Ingreso a laborar", d.ingreso_a_laborar],
     ["Observaciones", d.observaciones || "—"],
-    ["Advertencia 45 días", d.advertencia_45_dias ? "Sí" : "No"],
-  ];
+    ["Advertencia 45 días", d.advertencia_45_dias ? "Sí" : "No"]
+  );
+  return campos;
 }
 
 function camposNomina(d: SolicitudNominaDetalle): [string, string][] {
@@ -70,7 +84,7 @@ export async function generarPdfSolicitud(params: {
   colaborador: Colaborador;
   lider: Colaborador;
   detalle: SolicitudPermisoDetalle | SolicitudVacacionesDetalle | SolicitudNominaDetalle;
-  estadoFinal: Extract<EstadoSolicitud, "aprobada" | "rechazada">;
+  estadoFinal: Extract<EstadoSolicitud, "aprobada" | "rechazada" | "pendiente">;
   motivoRechazo?: string | null;
   firmaBytes: Uint8Array;
 }): Promise<Uint8Array> {
@@ -144,8 +158,14 @@ export async function generarPdfSolicitud(params: {
   y -= 22;
   texto(TITULOS[solicitud.tipo].toUpperCase(), marginX, y, { size: 13, bold: true, color: ORANGE });
   y -= 16;
+  if (estadoFinal === "pendiente") {
+    texto("VISTA PREVIA — AÚN NO DECIDIDA", marginX, y, { size: 9, bold: true, color: rgb(0.7, 0.5, 0) });
+    y -= 13;
+  }
   texto(
-    `Radicada: ${new Date(solicitud.creado_en).toLocaleDateString("es-CO")}   ·   Decidida: ${new Date().toLocaleDateString("es-CO")}`,
+    estadoFinal === "pendiente"
+      ? `Radicada: ${new Date(solicitud.creado_en).toLocaleDateString("es-CO")}`
+      : `Radicada: ${new Date(solicitud.creado_en).toLocaleDateString("es-CO")}   ·   Decidida: ${new Date().toLocaleDateString("es-CO")}`,
     marginX,
     y,
     { size: 9, color: GRIS }
@@ -211,15 +231,18 @@ export async function generarPdfSolicitud(params: {
   y -= 26;
 
   // ---- Resultado de la decisión (bloque tipo "totales", alineado a la derecha) ----
-  const resultadoLabel = estadoFinal === "aprobada" ? "Aprobada" : "Rechazada";
-  const resultadoColor = estadoFinal === "aprobada" ? VERDE : ROJO;
+  const resultadoLabel =
+    estadoFinal === "aprobada" ? "Aprobada" : estadoFinal === "rechazada" ? "Rechazada" : "Pendiente";
+  const resultadoColor = estadoFinal === "aprobada" ? VERDE : estadoFinal === "rechazada" ? ROJO : rgb(0.7, 0.5, 0);
 
   texto("Líder de proceso", marginX + contentWidth - 220, y, { size: 9.5, color: GRIS });
   texto(lider.nombre_completo, marginX + contentWidth, y, { size: 9.5, align: "right" });
   y -= 15;
-  texto("Fecha de decisión", marginX + contentWidth - 220, y, { size: 9.5, color: GRIS });
-  texto(new Date().toLocaleDateString("es-CO"), marginX + contentWidth, y, { size: 9.5, align: "right" });
-  y -= 4;
+  if (estadoFinal !== "pendiente") {
+    texto("Fecha de decisión", marginX + contentWidth - 220, y, { size: 9.5, color: GRIS });
+    texto(new Date().toLocaleDateString("es-CO"), marginX + contentWidth, y, { size: 9.5, align: "right" });
+    y -= 4;
+  }
   page.drawLine({
     start: { x: marginX + contentWidth - 220, y: y - 4 },
     end: { x: marginX + contentWidth, y: y - 4 },

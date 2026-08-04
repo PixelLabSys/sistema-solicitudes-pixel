@@ -3,14 +3,20 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import type { Colaborador, SolicitudVacacionesDetalle } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
+import { crearArea, crearCargo } from "@/lib/data/catalogos-actions";
+import { SelectConCrear } from "@/components/select-con-crear";
 import { crearSolicitudVacaciones, actualizarSolicitudVacaciones } from "./actions";
 
 export function VacacionesForm({
   lideres,
+  areas,
+  cargos,
   colaborador,
   edicion,
 }: {
   lideres: Colaborador[];
+  areas: string[];
+  cargos: string[];
   colaborador: Colaborador;
   edicion?: {
     solicitudId: string;
@@ -21,6 +27,7 @@ export function VacacionesForm({
 }) {
   const [error, setError] = useState<string | null>(null);
   const [fechaDesde, setFechaDesde] = useState(edicion?.detalle.fecha_desde ?? "");
+  const [tipoVacaciones, setTipoVacaciones] = useState(edicion?.detalle.tipo_vacaciones ?? "");
   const [pending, startTransition] = useTransition();
   const firmaInputRef = useRef<HTMLInputElement>(null);
 
@@ -112,21 +119,40 @@ export function VacacionesForm({
 
         <div className="form-group">
           <label className="form-label">Área</label>
-          <input name="area" className="form-input" required defaultValue={d?.area} />
+          <SelectConCrear
+            name="area"
+            opciones={areas}
+            valorInicial={d?.area}
+            crearNuevo={crearArea}
+            placeholder="Selecciona un área..."
+          />
         </div>
         <div className="form-group">
           <label className="form-label">Cargo actual</label>
-          <input name="cargo_actual" className="form-input" required defaultValue={d?.cargo_actual} />
+          <SelectConCrear
+            name="cargo_actual"
+            opciones={cargos}
+            valorInicial={d?.cargo_actual}
+            crearNuevo={crearCargo}
+            placeholder="Selecciona un cargo..."
+          />
         </div>
 
         <div className="form-group">
           <label className="form-label">Tipo de vacaciones</label>
-          <select name="tipo_vacaciones" className="form-select" required defaultValue={d?.tipo_vacaciones ?? ""}>
+          <select
+            name="tipo_vacaciones"
+            className="form-select"
+            required
+            value={tipoVacaciones}
+            onChange={(e) => setTipoVacaciones(e.target.value as typeof tipoVacaciones)}
+          >
             <option value="" disabled>
               Selecciona...
             </option>
             <option value="compensadas">Vacaciones compensadas</option>
             <option value="disfrutadas">Vacaciones disfrutadas</option>
+            <option value="mixtas">Vacaciones mixtas</option>
           </select>
         </div>
         <div className="form-group">
@@ -147,6 +173,23 @@ export function VacacionesForm({
             ))}
           </select>
         </div>
+
+        {tipoVacaciones === "mixtas" && (
+          <div className="form-group">
+            <label className="form-label">Días a compensar</label>
+            <select name="dias_compensados" className="form-select" required defaultValue={d?.dias_compensados ?? ""}>
+              <option value="" disabled>
+                Selecciona...
+              </option>
+              {Array.from({ length: 30 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={n}>
+                  {n} {n === 1 ? "día" : "días"}
+                </option>
+              ))}
+            </select>
+            <p className="form-hint">El resto del periodo se entiende como disfrutado.</p>
+          </div>
+        )}
 
         <div className="form-group">
           <label className="form-label">Fecha de descanso — desde</label>

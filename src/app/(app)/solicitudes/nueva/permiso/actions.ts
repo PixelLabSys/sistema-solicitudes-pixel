@@ -34,6 +34,8 @@ export async function crearSolicitudPermiso(formData: FormData) {
   const supabase = await createClient();
 
   const lider_aprobador_id = String(formData.get("lider_aprobador_id") || "");
+  const area = String(formData.get("area") || "");
+  const cargo_actual = String(formData.get("cargo_actual") || "");
   const fecha_desde = String(formData.get("fecha_desde") || "");
   const fecha_hasta = String(formData.get("fecha_hasta") || "");
   const hora_desde = String(formData.get("hora_desde") || "");
@@ -41,9 +43,13 @@ export async function crearSolicitudPermiso(formData: FormData) {
   const tipo_permiso = String(formData.get("tipo_permiso") || "");
   const descripcion = String(formData.get("descripcion") || "");
   const firma_path = String(formData.get("firma_path") || "");
+  const soporte_path = String(formData.get("soporte_path") || "") || null;
 
   if (!lider_aprobador_id || !fecha_desde || !fecha_hasta || !hora_desde || !hora_hasta) {
     return { error: "Todos los campos de fecha, hora y líder son obligatorios." };
+  }
+  if (!area || !cargo_actual) {
+    return { error: "El área y el cargo actual son obligatorios." };
   }
   if (lider_aprobador_id === colaborador.id) {
     return { error: "No puedes elegirte a ti mismo como líder de proceso." };
@@ -76,6 +82,8 @@ export async function crearSolicitudPermiso(formData: FormData) {
 
   const { error: errorDetalle } = await supabase.from("solicitud_permiso").insert({
     solicitud_id: solicitud.id,
+    area,
+    cargo_actual,
     fecha_desde,
     fecha_hasta,
     hora_desde,
@@ -84,6 +92,7 @@ export async function crearSolicitudPermiso(formData: FormData) {
     horas_concedidas,
     tipo_permiso,
     descripcion,
+    soporte_url: soporte_path,
   });
 
   if (errorDetalle) {
@@ -116,6 +125,8 @@ export async function actualizarSolicitudPermiso(solicitudId: string, formData: 
   const supabase = await createClient();
 
   const lider_aprobador_id = String(formData.get("lider_aprobador_id") || "");
+  const area = String(formData.get("area") || "");
+  const cargo_actual = String(formData.get("cargo_actual") || "");
   const fecha_desde = String(formData.get("fecha_desde") || "");
   const fecha_hasta = String(formData.get("fecha_hasta") || "");
   const hora_desde = String(formData.get("hora_desde") || "");
@@ -123,9 +134,13 @@ export async function actualizarSolicitudPermiso(solicitudId: string, formData: 
   const tipo_permiso = String(formData.get("tipo_permiso") || "");
   const descripcion = String(formData.get("descripcion") || "");
   const firma_path = String(formData.get("firma_path") || "");
+  const soporte_path = String(formData.get("soporte_path") || "") || null;
 
   if (!lider_aprobador_id || !fecha_desde || !fecha_hasta || !hora_desde || !hora_hasta) {
     return { error: "Todos los campos de fecha, hora y líder son obligatorios." };
+  }
+  if (!area || !cargo_actual) {
+    return { error: "El área y el cargo actual son obligatorios." };
   }
   if (lider_aprobador_id === colaborador.id) {
     return { error: "No puedes elegirte a ti mismo como líder de proceso." };
@@ -154,6 +169,8 @@ export async function actualizarSolicitudPermiso(solicitudId: string, formData: 
   const { error: errorDetalle } = await supabase
     .from("solicitud_permiso")
     .update({
+      area,
+      cargo_actual,
       fecha_desde,
       fecha_hasta,
       hora_desde,
@@ -162,6 +179,7 @@ export async function actualizarSolicitudPermiso(solicitudId: string, formData: 
       horas_concedidas,
       tipo_permiso,
       descripcion,
+      ...(soporte_path ? { soporte_url: soporte_path } : {}),
     })
     .eq("solicitud_id", solicitudId);
 

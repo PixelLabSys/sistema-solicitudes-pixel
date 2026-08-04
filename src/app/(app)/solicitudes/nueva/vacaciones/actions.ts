@@ -17,6 +17,7 @@ export async function crearSolicitudVacaciones(formData: FormData) {
   const area = String(formData.get("area") || "").trim();
   const cargo_actual = String(formData.get("cargo_actual") || "").trim();
   const tipo_vacaciones = String(formData.get("tipo_vacaciones") || "");
+  const dias_compensados_raw = String(formData.get("dias_compensados") || "");
   const fecha_desde = String(formData.get("fecha_desde") || "");
   const fecha_hasta = String(formData.get("fecha_hasta") || "");
   const ingreso_a_laborar = String(formData.get("ingreso_a_laborar") || "");
@@ -39,6 +40,11 @@ export async function crearSolicitudVacaciones(formData: FormData) {
   }
   if (!firma_path) {
     return { error: "La firma es obligatoria." };
+  }
+
+  const dias_compensados = tipo_vacaciones === "mixtas" ? Number(dias_compensados_raw) : null;
+  if (tipo_vacaciones === "mixtas" && (!dias_compensados || dias_compensados < 1 || dias_compensados > 30)) {
+    return { error: "Indica cuántos días quieres compensar (1 a 30)." };
   }
 
   const diasAnticipacion =
@@ -65,6 +71,7 @@ export async function crearSolicitudVacaciones(formData: FormData) {
     area,
     cargo_actual,
     tipo_vacaciones,
+    dias_compensados,
     fecha_desde,
     fecha_hasta,
     ingreso_a_laborar,
@@ -105,6 +112,7 @@ export async function actualizarSolicitudVacaciones(solicitudId: string, formDat
   const area = String(formData.get("area") || "").trim();
   const cargo_actual = String(formData.get("cargo_actual") || "").trim();
   const tipo_vacaciones = String(formData.get("tipo_vacaciones") || "");
+  const dias_compensados_raw = String(formData.get("dias_compensados") || "");
   const fecha_desde = String(formData.get("fecha_desde") || "");
   const fecha_hasta = String(formData.get("fecha_hasta") || "");
   const ingreso_a_laborar = String(formData.get("ingreso_a_laborar") || "");
@@ -129,6 +137,11 @@ export async function actualizarSolicitudVacaciones(solicitudId: string, formDat
     return { error: "La firma es obligatoria." };
   }
 
+  const dias_compensados = tipo_vacaciones === "mixtas" ? Number(dias_compensados_raw) : null;
+  if (tipo_vacaciones === "mixtas" && (!dias_compensados || dias_compensados < 1 || dias_compensados > 30)) {
+    return { error: "Indica cuántos días quieres compensar (1 a 30)." };
+  }
+
   const diasAnticipacion =
     (new Date(fecha_desde).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
   const advertencia_45_dias = diasAnticipacion < 45;
@@ -149,6 +162,7 @@ export async function actualizarSolicitudVacaciones(solicitudId: string, formDat
       area,
       cargo_actual,
       tipo_vacaciones,
+      dias_compensados,
       fecha_desde,
       fecha_hasta,
       ingreso_a_laborar,

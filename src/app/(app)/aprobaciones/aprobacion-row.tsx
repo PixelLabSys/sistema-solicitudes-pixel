@@ -65,12 +65,14 @@ export function AprobacionRow({
   permiso,
   vacaciones,
   nomina,
+  urlSoporte,
 }: {
   solicitud: Solicitud;
   colaborador: Colaborador;
   permiso?: SolicitudPermisoDetalle;
   vacaciones?: SolicitudVacacionesDetalle;
   nomina?: SolicitudNominaDetalle;
+  urlSoporte?: string;
 }) {
   const [mostrarRechazo, setMostrarRechazo] = useState(false);
   const [motivo, setMotivo] = useState("");
@@ -119,7 +121,27 @@ export function AprobacionRow({
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <a
+            href={`/aprobaciones/vista-previa/${solicitud.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-ghost btn-sm"
+            title="Ver solicitud completa (PDF)"
+          >
+            👁 Ver solicitud
+          </a>
+          {urlSoporte && (
+            <a
+              href={urlSoporte}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-ghost btn-sm"
+              title="Ver soporte adjunto"
+            >
+              👁 Ver soporte
+            </a>
+          )}
           <button className="btn btn-success btn-sm" disabled={pending} onClick={handleAprobar}>
             Aprobar
           </button>

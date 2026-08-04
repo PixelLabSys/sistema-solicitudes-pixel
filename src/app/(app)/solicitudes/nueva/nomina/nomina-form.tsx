@@ -3,14 +3,18 @@
 import { useRef, useState, useTransition } from "react";
 import type { Colaborador, SolicitudNominaDetalle } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
+import { crearCargo } from "@/lib/data/catalogos-actions";
+import { SelectConCrear } from "@/components/select-con-crear";
 import { crearSolicitudNomina, actualizarSolicitudNomina } from "./actions";
 
 export function NominaForm({
   lideres,
+  cargos,
   colaborador,
   edicion,
 }: {
   lideres: Colaborador[];
+  cargos: string[];
   colaborador: Colaborador;
   edicion?: {
     solicitudId: string;
@@ -99,7 +103,13 @@ export function NominaForm({
 
         <div className="form-group">
           <label className="form-label">Cargo</label>
-          <input name="cargo" className="form-input" required defaultValue={d?.cargo} />
+          <SelectConCrear
+            name="cargo"
+            opciones={cargos}
+            valorInicial={d?.cargo}
+            crearNuevo={crearCargo}
+            placeholder="Selecciona un cargo..."
+          />
         </div>
         <div className="form-group">
           <label className="form-label">Tipo de adelanto</label>

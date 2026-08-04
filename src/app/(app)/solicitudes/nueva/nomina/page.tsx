@@ -1,18 +1,21 @@
 import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
-import type { Colaborador } from "@/lib/types";
+import type { Cargo, Colaborador } from "@/lib/types";
 import { NominaForm } from "./nomina-form";
 
 export default async function NuevaSolicitudNominaPage() {
   const colaborador = await getColaboradorActual();
   const supabase = await createClient();
 
-  const { data: lideres } = await supabase
-    .from("colaborador")
-    .select("*")
-    .eq("es_lider_area", true)
-    .eq("activo", true)
-    .neq("id", colaborador?.id ?? "");
+  const [{ data: lideres }, { data: cargos }] = await Promise.all([
+    supabase
+      .from("colaborador")
+      .select("*")
+      .eq("es_lider_area", true)
+      .eq("activo", true)
+      .neq("id", colaborador?.id ?? ""),
+    supabase.from("cargo").select("*").eq("activo", true).order("nombre"),
+  ]);
 
   return (
     <div>
@@ -26,6 +29,7 @@ export default async function NuevaSolicitudNominaPage() {
       <div className="card">
         <NominaForm
           lideres={(lideres ?? []) as Colaborador[]}
+          cargos={((cargos ?? []) as Cargo[]).map((c) => c.nombre)}
           colaborador={colaborador!}
         />
       </div>

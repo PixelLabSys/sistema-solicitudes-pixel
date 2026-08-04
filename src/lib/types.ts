@@ -29,6 +29,8 @@ export type Solicitud = {
 
 export type SolicitudPermisoDetalle = {
   solicitud_id: string;
+  area: string | null;
+  cargo_actual: string | null;
   fecha_desde: string;
   fecha_hasta: string;
   hora_desde: string;
@@ -37,18 +39,34 @@ export type SolicitudPermisoDetalle = {
   horas_concedidas: number;
   tipo_permiso: "medico" | "personal";
   descripcion: string | null;
+  soporte_url: string | null;
 };
 
 export type SolicitudVacacionesDetalle = {
   solicitud_id: string;
   area: string;
   cargo_actual: string;
-  tipo_vacaciones: "compensadas" | "disfrutadas";
+  tipo_vacaciones: "compensadas" | "disfrutadas" | "mixtas";
+  dias_compensados: number | null;
   fecha_desde: string;
   fecha_hasta: string;
   ingreso_a_laborar: string;
   observaciones: string | null;
   advertencia_45_dias: boolean;
+};
+
+export type Area = {
+  id: string;
+  nombre: string;
+  activo: boolean;
+  creado_en: string;
+};
+
+export type Cargo = {
+  id: string;
+  nombre: string;
+  activo: boolean;
+  creado_en: string;
 };
 
 export type SolicitudNominaDetalle = {

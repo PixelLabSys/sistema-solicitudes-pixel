@@ -101,7 +101,7 @@ export async function actualizarRoles(
     .eq("id", colaboradorId);
 
   if (error) {
-    return { error: "Solo puede haber un Líder de Talento Humano a la vez." };
+    return { error: error.message };
   }
 
   revalidatePath("/configuracion");
