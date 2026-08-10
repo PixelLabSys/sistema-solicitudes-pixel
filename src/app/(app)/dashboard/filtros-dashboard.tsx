@@ -15,7 +15,7 @@ export function FiltrosDashboard({ colaboradores }: { colaboradores: Colaborador
   }
 
   return (
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+    <div className="filtros-row" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
       <select
         className="form-select"
         defaultValue={searchParams.get("colaborador_id") ?? ""}

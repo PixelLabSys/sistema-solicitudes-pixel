@@ -97,7 +97,7 @@ export function AprobacionRow({
 
   return (
     <div className="card">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
         <div>
           <p style={{ fontWeight: 500 }}>
             {solicitud.consecutivo} · {colaborador?.nombre_completo}
@@ -121,7 +121,7 @@ export function AprobacionRow({
             </div>
           )}
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <a
             href={`/aprobaciones/vista-previa/${solicitud.id}`}
             target="_blank"

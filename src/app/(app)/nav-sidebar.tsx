@@ -7,9 +7,11 @@ import { createClient } from "@/lib/supabase/client";
 export function NavSidebar({
   esLiderArea,
   esLiderTh,
+  onNavigate,
 }: {
   esLiderArea: boolean;
   esLiderTh: boolean;
+  onNavigate?: () => void;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -22,7 +24,7 @@ export function NavSidebar({
   }
 
   const item = (href: string, label: string) => (
-    <Link href={href} className={`nav-item ${pathname === href ? "active" : ""}`}>
+    <Link href={href} className={`nav-item ${pathname === href ? "active" : ""}`} onClick={onNavigate}>
       {label}
     </Link>
   );

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
-import { NavSidebar } from "./nav-sidebar";
+import { AppShell } from "./app-shell";
 
 export default async function AppLayout({
   children,
@@ -50,30 +50,14 @@ export default async function AppLayout({
     : "Colaborador";
 
   return (
-    <div className="app">
-      <aside className="sidebar">
-        <div className="logo-area" style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/pixel-logo-inv.png" alt="Pixel Graphic" style={{ height: 47, width: "auto", display: "block" }} />
-          <p className="logo-sub" style={{ marginTop: 8 }}>Sistema de solicitudes</p>
-        </div>
-        <NavSidebar
-          esLiderArea={colaborador.es_lider_area}
-          esLiderTh={colaborador.es_lider_th}
-        />
-        <div className="sidebar-footer" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div className="user-avatar">{iniciales}</div>
-          <div style={{ minWidth: 0 }}>
-            <p className="user-name" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {colaborador.nombre_completo}
-            </p>
-            <p className="user-role">{rol}</p>
-          </div>
-        </div>
-      </aside>
-      <div className="main">
-        <div className="content">{children}</div>
-      </div>
-    </div>
+    <AppShell
+      esLiderArea={colaborador.es_lider_area}
+      esLiderTh={colaborador.es_lider_th}
+      nombreCompleto={colaborador.nombre_completo}
+      rol={rol}
+      iniciales={iniciales}
+    >
+      {children}
+    </AppShell>
   );
 }
