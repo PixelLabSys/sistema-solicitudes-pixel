@@ -5,6 +5,8 @@ import type { Colaborador, Solicitud } from "@/lib/types";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
+const APP_URL = "https://sistema-solicitudes-pixel.vercel.app";
+
 const TIPO_LABEL: Record<Solicitud["tipo"], string> = {
   permiso: "Permiso",
   vacaciones: "Vacaciones",
@@ -36,11 +38,14 @@ export async function notificarNuevaSolicitud(
       ctaTexto: "Revisar solicitud",
     });
 
+    const text = `${colaborador.nombre_completo} radicó una solicitud de ${TIPO_LABEL[solicitud.tipo]} (${solicitud.consecutivo}) y te eligió como líder de proceso.\n\nIngresa para revisarla: ${APP_URL}`;
+
     const { error } = await resend.emails.send({
       from: REMITENTE,
       to: lider.correo,
       subject: `Nueva solicitud pendiente: ${solicitud.consecutivo}`,
       html,
+      text,
     });
     if (error) await registrarEvento(supabase, solicitud.id, "email_fallido");
   } catch {
@@ -73,11 +78,16 @@ export async function notificarDecision(
       ctaTexto: "Ver mi solicitud",
     });
 
+    const text = `Tu solicitud de ${TIPO_LABEL[solicitud.tipo]} ${solicitud.consecutivo} fue ${estadoFinal}.${
+      !aprobada && motivo ? `\n\nMotivo: ${motivo}` : ""
+    }\n\nIngresa para ver el detalle: ${APP_URL}`;
+
     const { error } = await resend.emails.send({
       from: REMITENTE,
       to: colaborador.correo,
       subject: `Tu solicitud ${solicitud.consecutivo} fue ${estadoFinal}`,
       html,
+      text,
     });
     if (error) await registrarEvento(supabase, solicitud.id, "email_fallido");
   } catch {
@@ -110,11 +120,14 @@ export async function notificarLiderTH(
       ctaTexto: "Ver Dashboard",
     });
 
+    const text = `${colaborador.nombre_completo} tuvo su solicitud de ${TIPO_LABEL[solicitud.tipo]} (${solicitud.consecutivo}) aprobada.\n\nVer Dashboard: ${APP_URL}`;
+
     const { error } = await resend.emails.send({
       from: REMITENTE,
       to: (lideresTh as Colaborador[]).map((l) => l.correo),
       subject: `Solicitud aprobada: ${solicitud.consecutivo}`,
       html,
+      text,
     });
 
     if (error) {

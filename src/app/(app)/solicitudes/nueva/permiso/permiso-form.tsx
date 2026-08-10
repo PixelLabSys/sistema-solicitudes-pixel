@@ -184,6 +184,8 @@ export function PermisoForm({
             </option>
             <option value="medico">Médico</option>
             <option value="personal">Personal</option>
+            <option value="escolar">Escolar</option>
+            <option value="judicial">Judicial</option>
           </select>
         </div>
 

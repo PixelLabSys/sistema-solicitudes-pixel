@@ -14,7 +14,7 @@ export function ColaboradorRow({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function toggle(campo: "es_lider_area" | "es_lider_th", valorActual: boolean) {
+  function toggle(campo: "es_lider_area" | "es_lider_th" | "es_lider_general", valorActual: boolean) {
     setError(null);
     startTransition(async () => {
       const res = await actualizarRoles(colaborador.id, { [campo]: !valorActual });
@@ -52,6 +52,14 @@ export function ColaboradorRow({
           checked={colaborador.es_lider_th}
           disabled={pending}
           onChange={() => toggle("es_lider_th", colaborador.es_lider_th)}
+        />
+      </td>
+      <td>
+        <input
+          type="checkbox"
+          checked={colaborador.es_lider_general}
+          disabled={pending}
+          onChange={() => toggle("es_lider_general", colaborador.es_lider_general)}
         />
       </td>
       <td>

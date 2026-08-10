@@ -76,7 +76,7 @@ export async function importarColaboradores(
 
 export async function actualizarRoles(
   colaboradorId: string,
-  cambios: { es_lider_area?: boolean; es_lider_th?: boolean }
+  cambios: { es_lider_area?: boolean; es_lider_th?: boolean; es_lider_general?: boolean }
 ) {
   await requireLiderTh();
   const supabase = await createClient();
@@ -101,6 +101,9 @@ export async function actualizarRoles(
     .eq("id", colaboradorId);
 
   if (error) {
+    if (cambios.es_lider_general && error.message.includes("duplicate")) {
+      return { error: "Ya hay un Líder General asignado. Quítale el rol primero antes de asignarlo a otra persona." };
+    }
     return { error: error.message };
   }
 

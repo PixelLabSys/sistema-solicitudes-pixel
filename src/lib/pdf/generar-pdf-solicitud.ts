@@ -25,6 +25,13 @@ const TITULOS: Record<Solicitud["tipo"], string> = {
   nomina: "Solicitud de Adelanto de Nómina",
 };
 
+const TIPOS_PERMISO_LABEL: Record<string, string> = {
+  medico: "Médico",
+  personal: "Personal",
+  escolar: "Escolar",
+  judicial: "Judicial",
+};
+
 function camposPermiso(d: SolicitudPermisoDetalle): [string, string][] {
   return [
     ["Área", d.area || "—"],
@@ -35,7 +42,7 @@ function camposPermiso(d: SolicitudPermisoDetalle): [string, string][] {
     ["Hora hasta", d.hora_hasta],
     ["Días concedidos", String(d.dias_concedidos)],
     ["Horas concedidas", String(d.horas_concedidas)],
-    ["Tipo de permiso", d.tipo_permiso === "medico" ? "Médico" : "Personal"],
+    ["Tipo de permiso", TIPOS_PERMISO_LABEL[d.tipo_permiso] ?? d.tipo_permiso],
     ["Descripción", d.descripcion || "—"],
     ["Soporte adjunto", d.soporte_url ? "Sí" : "No"],
   ];

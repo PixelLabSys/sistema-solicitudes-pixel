@@ -7,24 +7,59 @@ import { getColaboradorActual } from "@/lib/data/colaborador-actual";
 import { notificarNuevaSolicitud } from "@/lib/email/notificaciones";
 import type { Colaborador } from "@/lib/types";
 
+async function resolverLiderAdelanto(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  colaboradorId: string
+): Promise<{ liderId: string } | { error: string }> {
+  const { data: liderGeneral } = await supabase
+    .from("colaborador")
+    .select("*")
+    .eq("es_lider_general", true)
+    .eq("activo", true)
+    .maybeSingle();
+
+  if (!liderGeneral) {
+    return { error: "No hay un Líder General configurado. Contacta a Talento Humano." };
+  }
+
+  if (liderGeneral.id !== colaboradorId) {
+    return { liderId: liderGeneral.id };
+  }
+
+  // El propio Líder General está radicando: no puede autoaprobarse,
+  // así que se enruta a un Líder de TH distinto como respaldo.
+  const { data: th } = await supabase
+    .from("colaborador")
+    .select("*")
+    .eq("es_lider_th", true)
+    .eq("activo", true)
+    .neq("id", colaboradorId)
+    .limit(1)
+    .maybeSingle();
+
+  if (!th) {
+    return {
+      error: "Eres el Líder General y no hay otro Líder de TH configurado para aprobar tu propia solicitud.",
+    };
+  }
+
+  return { liderId: th.id };
+}
+
 export async function crearSolicitudNomina(formData: FormData) {
   const colaborador = await getColaboradorActual();
   if (!colaborador) throw new Error("No autenticado.");
 
   const supabase = await createClient();
 
-  const lider_aprobador_id = String(formData.get("lider_aprobador_id") || "");
   const cargo = String(formData.get("cargo") || "").trim();
   const tipo_adelanto = String(formData.get("tipo_adelanto") || "");
   const valor_neto = Number(formData.get("valor_neto") || 0);
   const transferencia_bancaria = formData.get("transferencia_bancaria") === "on";
   const firma_path = String(formData.get("firma_path") || "");
 
-  if (!lider_aprobador_id || !cargo || !tipo_adelanto || !valor_neto) {
+  if (!cargo || !tipo_adelanto || !valor_neto) {
     return { error: "Todos los campos son obligatorios." };
-  }
-  if (lider_aprobador_id === colaborador.id) {
-    return { error: "No puedes elegirte a ti mismo como líder de proceso." };
   }
   if (valor_neto <= 0) {
     return { error: "El valor neto debe ser mayor a cero." };
@@ -32,6 +67,12 @@ export async function crearSolicitudNomina(formData: FormData) {
   if (!firma_path) {
     return { error: "La firma es obligatoria." };
   }
+
+  const resuelto = await resolverLiderAdelanto(supabase, colaborador.id);
+  if ("error" in resuelto) {
+    return { error: resuelto.error };
+  }
+  const lider_aprobador_id = resuelto.liderId;
 
   const { data: solicitud, error: errorInsert } = await supabase
     .from("solicitud")
@@ -85,18 +126,14 @@ export async function actualizarSolicitudNomina(solicitudId: string, formData: F
 
   const supabase = await createClient();
 
-  const lider_aprobador_id = String(formData.get("lider_aprobador_id") || "");
   const cargo = String(formData.get("cargo") || "").trim();
   const tipo_adelanto = String(formData.get("tipo_adelanto") || "");
   const valor_neto = Number(formData.get("valor_neto") || 0);
   const transferencia_bancaria = formData.get("transferencia_bancaria") === "on";
   const firma_path = String(formData.get("firma_path") || "");
 
-  if (!lider_aprobador_id || !cargo || !tipo_adelanto || !valor_neto) {
+  if (!cargo || !tipo_adelanto || !valor_neto) {
     return { error: "Todos los campos son obligatorios." };
-  }
-  if (lider_aprobador_id === colaborador.id) {
-    return { error: "No puedes elegirte a ti mismo como líder de proceso." };
   }
   if (valor_neto <= 0) {
     return { error: "El valor neto debe ser mayor a cero." };
@@ -105,9 +142,11 @@ export async function actualizarSolicitudNomina(solicitudId: string, formData: F
     return { error: "La firma es obligatoria." };
   }
 
+  // El líder de proceso de un Adelanto no es editable: se fijó automáticamente
+  // (Líder General) al momento de radicar y se conserva igual al editar.
   const { error: errorUpdate } = await supabase
     .from("solicitud")
-    .update({ lider_aprobador_id, firma_url: firma_path })
+    .update({ firma_url: firma_path })
     .eq("id", solicitudId)
     .eq("colaborador_id", colaborador.id);
 

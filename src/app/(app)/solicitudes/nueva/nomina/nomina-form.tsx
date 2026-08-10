@@ -8,12 +8,12 @@ import { SelectConCrear } from "@/components/select-con-crear";
 import { crearSolicitudNomina, actualizarSolicitudNomina } from "./actions";
 
 export function NominaForm({
-  lideres,
+  hayLiderGeneral,
   cargos,
   colaborador,
   edicion,
 }: {
-  lideres: Colaborador[];
+  hayLiderGeneral: boolean;
   cargos: string[];
   colaborador: Colaborador;
   edicion?: {
@@ -72,11 +72,11 @@ export function NominaForm({
     });
   }
 
-  if (lideres.length === 0) {
+  if (!hayLiderGeneral) {
     return (
       <div className="alert alert-error">
-        No hay líderes de área configurados todavía. Contacta a Talento Humano
-        antes de radicar una solicitud.
+        No hay un Líder General configurado todavía. Contacta a Talento Humano
+        antes de radicar una solicitud de adelanto.
       </div>
     );
   }
@@ -135,25 +135,6 @@ export function NominaForm({
             defaultValue={d?.valor_neto}
           />
         </div>
-        <div className="form-group">
-          <label className="form-label">Líder de proceso</label>
-          <select
-            name="lider_aprobador_id"
-            className="form-select"
-            required
-            defaultValue={edicion?.liderActualId ?? ""}
-          >
-            <option value="" disabled>
-              Selecciona un líder de área...
-            </option>
-            {lideres.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.nombre_completo}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div className="form-group form-full" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
           <input
             name="transferencia_bancaria"
@@ -179,6 +160,10 @@ export function NominaForm({
           />
         </div>
       </div>
+
+      <p className="form-hint" style={{ marginBottom: 12 }}>
+        Esta solicitud se envía automáticamente al Líder General para su aprobación.
+      </p>
 
       <button type="submit" className="btn btn-primary" disabled={pending}>
         {pending ? "Enviando..." : edicion ? "Guardar cambios" : "Enviar solicitud"}

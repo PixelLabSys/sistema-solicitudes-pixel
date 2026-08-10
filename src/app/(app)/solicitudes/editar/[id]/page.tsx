@@ -43,7 +43,7 @@ export default async function EditarSolicitudPage({
 
   const s = solicitud as Solicitud;
 
-  const [{ data: lideres }, { data: areas }, { data: cargos }] = await Promise.all([
+  const [{ data: lideres }, { data: areas }, { data: cargos }, { count: liderGeneralCount }] = await Promise.all([
     supabase
       .from("colaborador")
       .select("*")
@@ -52,6 +52,11 @@ export default async function EditarSolicitudPage({
       .neq("id", colaborador?.id ?? ""),
     supabase.from("area").select("*").eq("activo", true).order("nombre"),
     supabase.from("cargo").select("*").eq("activo", true).order("nombre"),
+    supabase
+      .from("colaborador")
+      .select("id", { count: "exact", head: true })
+      .eq("es_lider_general", true)
+      .eq("activo", true),
   ]);
 
   const tablaDetalle =
@@ -94,7 +99,7 @@ export default async function EditarSolicitudPage({
         )}
         {s.tipo === "nomina" && (
           <NominaForm
-            lideres={(lideres ?? []) as Colaborador[]}
+            hayLiderGeneral={(liderGeneralCount ?? 0) > 0}
             cargos={((cargos ?? []) as Cargo[]).map((c) => c.nombre)}
             colaborador={colaborador!}
             edicion={{ ...edicionBase, detalle: detalle as SolicitudNominaDetalle }}

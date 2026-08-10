@@ -6,6 +6,7 @@ export type Colaborador = {
   cc: string;
   es_lider_area: boolean;
   es_lider_th: boolean;
+  es_lider_general: boolean;
   activo: boolean;
   creado_en: string;
 };
@@ -37,7 +38,7 @@ export type SolicitudPermisoDetalle = {
   hora_hasta: string;
   dias_concedidos: number;
   horas_concedidas: number;
-  tipo_permiso: "medico" | "personal";
+  tipo_permiso: "medico" | "personal" | "escolar" | "judicial";
   descripcion: string | null;
   soporte_url: string | null;
 };

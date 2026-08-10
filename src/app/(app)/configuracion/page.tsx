@@ -36,8 +36,9 @@ export default async function ConfiguracionPage() {
         <p style={{ fontSize: 16, fontWeight: 600 }}>Configuración</p>
         <p style={{ fontSize: 13, color: "var(--text2)" }}>
           Alta de colaboradores, asignación de líderes de área, catálogos de
-          área/cargo, y Líderes de Talento Humano (puede haber varios, como
-          respaldo entre sí).
+          área/cargo, Líderes de Talento Humano (puede haber varios, como
+          respaldo entre sí), y el Líder General (recibe automáticamente las
+          solicitudes de Adelanto de Nómina — solo puede haber uno).
         </p>
       </div>
 
@@ -87,6 +88,7 @@ export default async function ConfiguracionPage() {
               <th>CC</th>
               <th>Líder de área</th>
               <th>Líder de TH</th>
+              <th>Líder General</th>
               <th>Estado</th>
               <th></th>
             </tr>
