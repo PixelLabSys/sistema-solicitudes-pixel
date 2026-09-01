@@ -1,7 +1,11 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Colaborador } from "@/lib/types";
 
-export async function getColaboradorActual(): Promise<Colaborador | null> {
+// cache() memoiza esto por request: layout.tsx y cada page.tsx lo llaman por
+// separado, y sin esto cada llamada repetía un round-trip a Supabase Auth
+// (getUser) más una consulta a `colaborador`.
+export const getColaboradorActual = cache(async (): Promise<Colaborador | null> => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -16,4 +20,4 @@ export async function getColaboradorActual(): Promise<Colaborador | null> {
     .maybeSingle();
 
   return data as Colaborador | null;
-}
+});

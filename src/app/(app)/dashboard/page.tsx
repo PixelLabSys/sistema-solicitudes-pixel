@@ -16,16 +16,6 @@ export default async function DashboardPage({
   const { tipo, estado, colaborador_id, desde, hasta } = await searchParams;
   const supabase = await createClient();
 
-  // Solicitudes visibles sin filtrar, para poblar el desplegable de colaboradores
-  // (RLS ya limita esto al alcance del líder de área o a todo para TH).
-  const { data: solicitudesVisibles } = await supabase.from("solicitud").select("colaborador_id");
-  const colaboradorIdsVisibles = [...new Set((solicitudesVisibles ?? []).map((s) => s.colaborador_id))];
-  const { data: colaboradoresDisponibles } = await supabase
-    .from("colaborador")
-    .select("*")
-    .in("id", colaboradorIdsVisibles.length ? colaboradorIdsVisibles : ["00000000-0000-0000-0000-000000000000"])
-    .order("nombre_completo");
-
   let query = supabase.from("solicitud").select("*").order("creado_en", { ascending: false });
   if (tipo) query = query.eq("tipo", tipo as TipoSolicitud);
   if (estado) query = query.eq("estado", estado as EstadoSolicitud);
@@ -33,27 +23,43 @@ export default async function DashboardPage({
   if (desde) query = query.gte("creado_en", desde);
   if (hasta) query = query.lte("creado_en", hasta + "T23:59:59");
 
-  const { data: solicitudes } = await query;
-  const lista = (solicitudes ?? []) as Solicitud[];
+  // Solicitudes visibles sin filtrar, para poblar el desplegable de colaboradores
+  // (RLS ya limita esto al alcance del líder de área o a todo para TH). Es
+  // independiente de la consulta filtrada de abajo, así que corren en paralelo.
+  const [{ data: solicitudesVisibles }, { data: solicitudes }] = await Promise.all([
+    supabase.from("solicitud").select("colaborador_id"),
+    query,
+  ]);
 
-  const colaboradorIds = [...new Set(lista.map((s) => s.colaborador_id))];
-  const { data: colaboradores } = await supabase
+  const colaboradorIdsVisibles = [...new Set((solicitudesVisibles ?? []).map((s) => s.colaborador_id))];
+  const { data: colaboradoresDisponibles } = await supabase
     .from("colaborador")
     .select("*")
-    .in("id", colaboradorIds.length ? colaboradorIds : ["00000000-0000-0000-0000-000000000000"]);
+    .in("id", colaboradorIdsVisibles.length ? colaboradorIdsVisibles : ["00000000-0000-0000-0000-000000000000"])
+    .order("nombre_completo");
+
+  const lista = (solicitudes ?? []) as Solicitud[];
+
+  // colaboradoresDisponibles ya es un superset de todos los colaboradores en
+  // `lista` (misma tabla, mismo alcance de RLS, sin los filtros de arriba),
+  // así que reutilizarlo evita una tercera consulta idéntica.
   const mapaColaboradores = new Map(
-    ((colaboradores ?? []) as Colaborador[]).map((c) => [c.id, c])
+    ((colaboradoresDisponibles ?? []) as Colaborador[]).map((c) => [c.id, c])
   );
 
-  const urlsPdf = new Map<string, string>();
-  for (const s of lista) {
-    if (s.pdf_url) {
-      const { data } = await supabase.storage
+  const conPdf = lista.filter((s) => s.pdf_url);
+  const firmasPdf = await Promise.all(
+    conPdf.map((s) =>
+      supabase.storage
         .from("pdfs")
-        .createSignedUrl(s.pdf_url, 300, { download: `${s.consecutivo}.pdf` });
-      if (data?.signedUrl) urlsPdf.set(s.id, data.signedUrl);
-    }
-  }
+        .createSignedUrl(s.pdf_url!, 300, { download: `${s.consecutivo}.pdf` })
+    )
+  );
+  const urlsPdf = new Map<string, string>();
+  conPdf.forEach((s, i) => {
+    const url = firmasPdf[i].data?.signedUrl;
+    if (url) urlsPdf.set(s.id, url);
+  });
 
   const pendientes = lista.filter((s) => s.estado === "pendiente").length;
   const aprobadas = lista.filter((s) => s.estado === "aprobada").length;

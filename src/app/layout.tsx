@@ -1,5 +1,20 @@
 import type { Metadata, Viewport } from "next";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Solicitudes — Pixel Graphic SAS",
@@ -17,14 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="h-full antialiased">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="es" className={`h-full antialiased ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

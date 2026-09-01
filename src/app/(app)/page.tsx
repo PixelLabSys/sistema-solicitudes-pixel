@@ -17,15 +17,19 @@ export default async function MisSolicitudesPage() {
 
   const lista = (solicitudes ?? []) as Solicitud[];
 
-  const urlsPdf = new Map<string, string>();
-  for (const s of lista) {
-    if (s.pdf_url) {
-      const { data } = await supabase.storage
+  const conPdf = lista.filter((s) => s.pdf_url);
+  const firmasPdf = await Promise.all(
+    conPdf.map((s) =>
+      supabase.storage
         .from("pdfs")
-        .createSignedUrl(s.pdf_url, 300, { download: `${s.consecutivo}.pdf` });
-      if (data?.signedUrl) urlsPdf.set(s.id, data.signedUrl);
-    }
-  }
+        .createSignedUrl(s.pdf_url!, 300, { download: `${s.consecutivo}.pdf` })
+    )
+  );
+  const urlsPdf = new Map<string, string>();
+  conPdf.forEach((s, i) => {
+    const url = firmasPdf[i].data?.signedUrl;
+    if (url) urlsPdf.set(s.id, url);
+  });
 
   return (
     <div>

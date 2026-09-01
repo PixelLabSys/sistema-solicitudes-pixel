@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import * as XLSX from "xlsx";
 import { importarColaboradores } from "./actions";
 
 type FilaImportada = { nombre_completo: string; correo: string; cc: string };
@@ -34,6 +33,7 @@ export function ImportarExcelForm() {
 
     startTransition(async () => {
       try {
+        const XLSX = await import("xlsx");
         const buffer = await archivo.arrayBuffer();
         const libro = XLSX.read(buffer, { type: "array" });
         const hoja = libro.Sheets[libro.SheetNames[0]];

@@ -38,13 +38,15 @@ export default async function AprobacionesPage() {
   const mapaVacaciones = new Map((vacaciones ?? []).map((v) => [v.solicitud_id, v]));
   const mapaNominas = new Map((nominas ?? []).map((n) => [n.solicitud_id, n]));
 
+  const conSoporte = (permisos ?? []).filter((p) => p.soporte_url);
+  const firmasSoporte = await Promise.all(
+    conSoporte.map((p) => supabase.storage.from("soportes").createSignedUrl(p.soporte_url, 300))
+  );
   const mapaSoportes = new Map<string, string>();
-  for (const p of permisos ?? []) {
-    if (p.soporte_url) {
-      const { data } = await supabase.storage.from("soportes").createSignedUrl(p.soporte_url, 300);
-      if (data?.signedUrl) mapaSoportes.set(p.solicitud_id, data.signedUrl);
-    }
-  }
+  conSoporte.forEach((p, i) => {
+    const url = firmasSoporte[i].data?.signedUrl;
+    if (url) mapaSoportes.set(p.solicitud_id, url);
+  });
 
   return (
     <div>

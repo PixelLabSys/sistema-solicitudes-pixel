@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  /* Tipografía — Pixel Design System v1.0 */
-  --font: "Space Grotesk", sans-serif;
-  --mono: "JetBrains Mono", monospace;
+  /* Tipografía — Pixel Design System v1.0 (auto-hospedada vía next/font) */
+  --font: var(--font-space-grotesk), sans-serif;
+  --mono: var(--font-jetbrains-mono), monospace;
 
   /* Fondos */
   --bg: #0d1117;
