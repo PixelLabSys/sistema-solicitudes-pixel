@@ -71,7 +71,7 @@ export default async function DashboardPage({
         <p style={{ fontSize: 16, fontWeight: 600 }}>
           Dashboard{yo.es_lider_th ? "" : " de mi equipo"}
         </p>
-        <p style={{ fontSize: 13, color: "var(--text2)" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)" }}>
           {yo.es_lider_th
             ? "Historial completo de solicitudes de todos los colaboradores."
             : "Solicitudes donde has sido elegido como líder de proceso."}

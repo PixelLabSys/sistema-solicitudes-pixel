@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useTheme } from "@/lib/useTheme";
 
 export default function LoginPage() {
   const [cargando, setCargando] = useState(false);
   const [mensajeError, setMensajeError] = useState("");
+  const { tema } = useTheme();
+  const logo = tema === "dark" ? "/pixel-logo-inv.png" : "/pixel-logo.png";
 
   async function handleLoginGoogle() {
     setCargando(true);
@@ -52,13 +55,13 @@ export default function LoginPage() {
           borderRadius: "var(--radius-lg)",
           padding: 40,
           width: "min(400px, 92vw)",
-          boxShadow: "0 24px 64px rgba(0,0,0,.4)",
+          boxShadow: "0 24px 64px rgba(34,48,80,.12)",
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/pixel-logo-inv.png" alt="Pixel Graphic" style={{ height: 65, width: "auto", display: "block", marginBottom: 12 }} />
-          <p style={{ fontSize: 12, color: "var(--text3)", marginBottom: 24 }}>
+          <img src={logo} alt="Pixel Graphic" style={{ height: 65, width: "auto", display: "block", marginBottom: 12 }} />
+          <p style={{ fontSize: 12, color: "var(--subtle)", marginBottom: 24 }}>
             Sistema de Solicitudes
           </p>
         </div>
@@ -66,12 +69,12 @@ export default function LoginPage() {
         {(mensajeError || mensajeErrorUrl) && (
           <div
             style={{
-              background: "rgba(248,81,73,.12)",
-              border: "1px solid rgba(248,81,73,.3)",
+              background: "var(--estado-danger-bg)",
+              border: "1px solid var(--estado-danger-bg)",
               borderRadius: "var(--radius)",
               padding: "10px 12px",
               fontSize: 12,
-              color: "var(--red)",
+              color: "var(--estado-danger-text)",
               marginBottom: 16,
             }}
           >

@@ -22,7 +22,7 @@ export default async function NuevaSolicitudPermisoPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 16, fontWeight: 600 }}>Solicitud de permiso</p>
-        <p style={{ fontSize: 13, color: "var(--text2)" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)" }}>
           El consecutivo (SP-####) se asigna automáticamente al enviar.
         </p>
       </div>

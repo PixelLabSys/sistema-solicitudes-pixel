@@ -23,7 +23,7 @@ export default async function AppLayout({
           <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 8 }}>
             Tu cuenta no está vinculada a ningún colaborador
           </p>
-          <p style={{ fontSize: 13, color: "var(--text2)" }}>
+          <p style={{ fontSize: 13, color: "var(--muted)" }}>
             Contacta a Talento Humano para que verifiquen tu acceso al
             sistema.
           </p>
@@ -35,13 +35,6 @@ export default async function AppLayout({
   if (!colaborador.activo) {
     redirect("/login");
   }
-
-  const iniciales = colaborador.nombre_completo
-    .split(" ")
-    .map((p) => p[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
   const rol = colaborador.es_lider_th
     ? "Líder de Talento Humano"
@@ -55,7 +48,6 @@ export default async function AppLayout({
       esLiderTh={colaborador.es_lider_th}
       nombreCompleto={colaborador.nombre_completo}
       rol={rol}
-      iniciales={iniciales}
     >
       {children}
     </AppShell>

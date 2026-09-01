@@ -74,7 +74,7 @@ export default async function EditarSolicitudPage({
     <div>
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 16, fontWeight: 600 }}>{TITULOS[s.tipo]}</p>
-        <p style={{ fontSize: 13, color: "var(--text2)" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)" }}>
           {s.consecutivo} · Solo puedes editar mientras esté Pendiente.
         </p>
       </div>

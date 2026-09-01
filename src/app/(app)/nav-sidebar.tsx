@@ -1,8 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { usePathname } from "next/navigation";
+import {
+  IconSolicitudes,
+  IconPermiso,
+  IconVacaciones,
+  IconAdelanto,
+  IconAprobacion,
+  IconDashboard,
+  IconConfiguracion,
+} from "@/components/icons";
 
 export function NavSidebar({
   esLiderArea,
@@ -14,17 +22,10 @@ export function NavSidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
 
-  async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
-
-  const item = (href: string, label: string) => (
+  const item = (href: string, label: string, Icon: (props: { className?: string }) => React.ReactElement) => (
     <Link href={href} className={`nav-item ${pathname === href ? "active" : ""}`} onClick={onNavigate}>
+      <Icon className="nav-icon" />
       {label}
     </Link>
   );
@@ -32,35 +33,26 @@ export function NavSidebar({
   return (
     <nav className="nav">
       <p className="nav-section">Solicitudes</p>
-      {item("/", "Mis solicitudes")}
-      {item("/solicitudes/nueva/permiso", "Nueva: Permiso")}
-      {item("/solicitudes/nueva/vacaciones", "Nueva: Vacaciones")}
-      {item("/solicitudes/nueva/nomina", "Nueva: Adelanto")}
+      {item("/", "Mis solicitudes", IconSolicitudes)}
+      {item("/solicitudes/nueva/permiso", "Nueva: Permiso", IconPermiso)}
+      {item("/solicitudes/nueva/vacaciones", "Nueva: Vacaciones", IconVacaciones)}
+      {item("/solicitudes/nueva/nomina", "Nueva: Adelanto", IconAdelanto)}
 
       {esLiderArea && (
         <>
           <p className="nav-section">Aprobación</p>
-          {item("/aprobaciones", "Bandeja de aprobación")}
-          {item("/dashboard", "Dashboard de mi equipo")}
+          {item("/aprobaciones", "Bandeja de aprobación", IconAprobacion)}
+          {item("/dashboard", "Dashboard de mi equipo", IconDashboard)}
         </>
       )}
 
       {esLiderTh && (
         <>
           <p className="nav-section">Talento humano</p>
-          {!esLiderArea && item("/dashboard", "Dashboard")}
-          {item("/configuracion", "Configuración")}
+          {!esLiderArea && item("/dashboard", "Dashboard", IconDashboard)}
+          {item("/configuracion", "Configuración", IconConfiguracion)}
         </>
       )}
-
-      <p className="nav-section">Cuenta</p>
-      <button
-        onClick={handleLogout}
-        className="nav-item"
-        style={{ width: "100%", textAlign: "left", background: "none", border: "none" }}
-      >
-        Cerrar sesión
-      </button>
     </nav>
   );
 }

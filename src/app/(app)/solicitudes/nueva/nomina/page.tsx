@@ -20,7 +20,7 @@ export default async function NuevaSolicitudNominaPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 16, fontWeight: 600 }}>Solicitud de adelanto de nómina</p>
-        <p style={{ fontSize: 13, color: "var(--text2)" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)" }}>
           El sistema solo registra la solicitud; el pago lo gestiona Talento
           Humano por fuera del sistema.
         </p>

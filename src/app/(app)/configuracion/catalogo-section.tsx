@@ -91,7 +91,7 @@ export function CatalogoSection({
               alignItems: "center",
               gap: 8,
               padding: "8px 10px",
-              background: "var(--surface2)",
+              background: "var(--surface-hover)",
               borderRadius: "var(--radius)",
             }}
           >
@@ -127,7 +127,7 @@ export function CatalogoSection({
           </div>
         ))}
         {items.length === 0 && (
-          <p style={{ fontSize: 12, color: "var(--text3)" }}>Todavía no hay elementos.</p>
+          <p style={{ fontSize: 12, color: "var(--subtle)" }}>Todavía no hay elementos.</p>
         )}
       </div>
     </div>

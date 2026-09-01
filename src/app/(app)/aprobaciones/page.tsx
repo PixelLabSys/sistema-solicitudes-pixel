@@ -52,7 +52,7 @@ export default async function AprobacionesPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 16, fontWeight: 600 }}>Bandeja de aprobación</p>
-        <p style={{ fontSize: 13, color: "var(--text2)" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)" }}>
           Solicitudes pendientes donde fuiste elegido como líder de proceso.
         </p>
       </div>

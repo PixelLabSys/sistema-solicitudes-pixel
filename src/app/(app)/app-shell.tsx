@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useTheme } from "@/lib/useTheme";
+import { IconMenu, IconClose, IconSun, IconMoon, IconLogout } from "@/components/icons";
 import { NavSidebar } from "./nav-sidebar";
 
 export function AppShell({
@@ -8,55 +10,78 @@ export function AppShell({
   esLiderTh,
   nombreCompleto,
   rol,
-  iniciales,
   children,
 }: {
   esLiderArea: boolean;
   esLiderTh: boolean;
   nombreCompleto: string;
   rol: string;
-  iniciales: string;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const { tema, alternar } = useTheme();
+  const logo = tema === "dark" ? "/pixel-logo-inv.png" : "/pixel-logo.png";
+  const inicial = nombreCompleto.charAt(0).toUpperCase();
 
   return (
     <div className="app">
       <div className="mobile-topbar">
-        <button
-          className="menu-toggle"
-          onClick={() => setOpen(true)}
-          aria-label="Abrir menú"
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
+        <button className="menu-toggle" onClick={() => setOpen(true)} aria-label="Abrir menú">
+          <IconMenu />
         </button>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/pixel-logo-inv.png" alt="Pixel Graphic" />
+        <img src={logo} alt="Pixel Graphic" />
         <div style={{ width: 34 }} />
       </div>
 
       {open && <div className="sidebar-overlay" onClick={() => setOpen(false)} />}
 
       <aside className={`sidebar ${open ? "open" : ""}`}>
-        <div
-          className="logo-area"
-          style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}
-        >
+        <div className="logo-area">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/pixel-logo-inv.png" alt="Pixel Graphic" style={{ height: 47, width: "auto", display: "block" }} />
-          <p className="logo-sub" style={{ marginTop: 8 }}>Sistema de solicitudes</p>
+          <img src={logo} alt="Pixel Graphic" style={{ height: 52, width: "auto", display: "block" }} />
+          <button
+            className="menu-toggle"
+            onClick={() => setOpen(false)}
+            aria-label="Cerrar menú"
+            style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}
+          >
+            <IconClose />
+          </button>
         </div>
+
         <NavSidebar esLiderArea={esLiderArea} esLiderTh={esLiderTh} onNavigate={() => setOpen(false)} />
-        <div className="sidebar-footer" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div className="user-avatar">{iniciales}</div>
-          <div style={{ minWidth: 0 }}>
-            <p className="user-name" style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {nombreCompleto}
-            </p>
-            <p className="user-role">{rol}</p>
+
+        <div className="sidebar-bottom">
+          <button
+            type="button"
+            onClick={alternar}
+            aria-label={tema === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+            className="theme-toggle"
+          >
+            <span className="theme-toggle-label">
+              {tema === "dark" ? <IconMoon /> : <IconSun />}
+              {tema === "dark" ? "Oscuro" : "Claro"}
+            </span>
+            <span className="theme-toggle-track">
+              <span className="theme-toggle-thumb" />
+            </span>
+          </button>
+
+          <div className="user-block">
+            <div className="user-avatar">{inicial}</div>
+            <div style={{ minWidth: 0 }}>
+              <p className="user-name">{nombreCompleto}</p>
+              <p className="user-role">{rol}</p>
+            </div>
           </div>
+
+          <form action="/api/auth/signout" method="post">
+            <button type="submit" className="logout-btn">
+              <IconLogout />
+              Cerrar sesión
+            </button>
+          </form>
         </div>
       </aside>
       <div className="main">

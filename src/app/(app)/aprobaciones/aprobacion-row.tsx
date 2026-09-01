@@ -102,16 +102,16 @@ export function AprobacionRow({
           <p style={{ fontWeight: 500 }}>
             {solicitud.consecutivo} · {colaborador?.nombre_completo}
           </p>
-          <p style={{ fontSize: 13, color: "var(--text2)", marginTop: 4 }}>
+          <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
             <Detalle solicitud={solicitud} permiso={permiso} vacaciones={vacaciones} nomina={nomina} />
           </p>
           {solicitud.tipo === "permiso" && permiso?.descripcion && (
-            <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 4 }}>
+            <p style={{ fontSize: 12, color: "var(--subtle)", marginTop: 4 }}>
               {permiso.descripcion}
             </p>
           )}
           {solicitud.tipo === "vacaciones" && vacaciones?.observaciones && (
-            <p style={{ fontSize: 12, color: "var(--text3)", marginTop: 4 }}>
+            <p style={{ fontSize: 12, color: "var(--subtle)", marginTop: 4 }}>
               {vacaciones.observaciones}
             </p>
           )}

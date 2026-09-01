@@ -34,7 +34,7 @@ export default async function ConfiguracionPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 16, fontWeight: 600 }}>Configuración</p>
-        <p style={{ fontSize: 13, color: "var(--text2)" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)" }}>
           Alta de colaboradores, asignación de líderes de área, catálogos de
           área/cargo, Líderes de Talento Humano (puede haber varios, como
           respaldo entre sí), y el Líder General (recibe automáticamente las

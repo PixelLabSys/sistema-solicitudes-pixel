@@ -35,7 +35,7 @@ export default async function MisSolicitudesPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 16, fontWeight: 600 }}>Mis solicitudes</p>
-        <p style={{ fontSize: 13, color: "var(--text2)" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)" }}>
           Historial de tus solicitudes de permisos, vacaciones y adelantos.
         </p>
       </div>
@@ -59,7 +59,7 @@ export default async function MisSolicitudesPage() {
                 <td>
                   <EstadoBadge estado={s.estado} />
                   {s.estado === "rechazada" && s.motivo_rechazo && (
-                    <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 4 }}>
+                    <div style={{ fontSize: 11, color: "var(--subtle)", marginTop: 4 }}>
                       {s.motivo_rechazo}
                     </div>
                   )}

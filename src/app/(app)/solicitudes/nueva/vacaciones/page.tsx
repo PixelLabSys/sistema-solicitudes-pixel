@@ -22,7 +22,7 @@ export default async function NuevaSolicitudVacacionesPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <p style={{ fontSize: 16, fontWeight: 600 }}>Solicitud de vacaciones</p>
-        <p style={{ fontSize: 13, color: "var(--text2)" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)" }}>
           Recuerda radicar con 45 días de anticipación a la fecha de descanso.
         </p>
       </div>
