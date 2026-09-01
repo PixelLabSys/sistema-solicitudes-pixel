@@ -10,12 +10,14 @@ export function AppShell({
   esLiderTh,
   nombreCompleto,
   rol,
+  avatarUrl,
   children,
 }: {
   esLiderArea: boolean;
   esLiderTh: boolean;
   nombreCompleto: string;
   rol: string;
+  avatarUrl?: string | null;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -69,7 +71,12 @@ export function AppShell({
           </button>
 
           <div className="user-block">
-            <div className="user-avatar">{inicial}</div>
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt="" className="user-avatar-img" referrerPolicy="no-referrer" />
+            ) : (
+              <div className="user-avatar">{inicial}</div>
+            )}
             <div style={{ minWidth: 0 }}>
               <p className="user-name">{nombreCompleto}</p>
               <p className="user-role">{rol}</p>

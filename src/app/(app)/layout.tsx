@@ -48,6 +48,7 @@ export default async function AppLayout({
       esLiderTh={colaborador.es_lider_th}
       nombreCompleto={colaborador.nombre_completo}
       rol={rol}
+      avatarUrl={colaborador.avatar_url}
     >
       {children}
     </AppShell>
