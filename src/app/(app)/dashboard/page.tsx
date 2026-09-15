@@ -4,6 +4,20 @@ import { getColaboradorActual } from "@/lib/data/colaborador-actual";
 import type { Colaborador, EstadoSolicitud, Solicitud, TipoSolicitud } from "@/lib/types";
 import { EstadoBadge } from "@/lib/estado-badge";
 import { FiltrosDashboard } from "./filtros-dashboard";
+import { ExportarExcelBoton } from "./exportar-excel-boton";
+
+const TIPO_LABEL: Record<TipoSolicitud, string> = {
+  permiso: "Permiso",
+  vacaciones: "Vacaciones",
+  nomina: "Adelanto",
+};
+
+const ESTADO_LABEL: Record<EstadoSolicitud, string> = {
+  pendiente: "Pendiente",
+  aprobada: "Aprobada",
+  rechazada: "Rechazada",
+  cancelada: "Cancelada",
+};
 
 export default async function DashboardPage({
   searchParams,
@@ -61,6 +75,17 @@ export default async function DashboardPage({
     if (url) urlsPdf.set(s.id, url);
   });
 
+  const filasExport = lista.map((s) => ({
+    consecutivo: s.consecutivo,
+    colaborador: mapaColaboradores.get(s.colaborador_id)?.nombre_completo ?? "—",
+    tipo: TIPO_LABEL[s.tipo],
+    estado: ESTADO_LABEL[s.estado],
+    lider_aprobador: mapaColaboradores.get(s.lider_aprobador_id)?.nombre_completo ?? "—",
+    radicada: new Date(s.creado_en).toLocaleDateString("es-CO"),
+    decidida: s.decidido_en ? new Date(s.decidido_en).toLocaleDateString("es-CO") : "—",
+    motivo_rechazo: s.motivo_rechazo ?? "",
+  }));
+
   const pendientes = lista.filter((s) => s.estado === "pendiente").length;
   const aprobadas = lista.filter((s) => s.estado === "aprobada").length;
   const rechazadas = lista.filter((s) => s.estado === "rechazada").length;
@@ -96,6 +121,7 @@ export default async function DashboardPage({
       <div className="table-wrap">
         <div className="table-header">
           <FiltrosDashboard colaboradores={(colaboradoresDisponibles ?? []) as Colaborador[]} />
+          <ExportarExcelBoton filas={filasExport} />
         </div>
         <table>
           <thead>
