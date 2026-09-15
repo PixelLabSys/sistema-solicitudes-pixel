@@ -57,7 +57,7 @@ export function ExportarExcelBoton({ filas }: { filas: FilaExport[] }) {
   return (
     <button
       type="button"
-      className="btn btn-secondary btn-sm"
+      className="btn btn-primary btn-sm"
       onClick={exportar}
       disabled={exportando || filas.length === 0}
     >
