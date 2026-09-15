@@ -122,3 +122,22 @@ export function IconLogout({ className }: IconProps) {
     </svg>
   );
 }
+
+export function IconEye({ className }: IconProps) {
+  return (
+    <svg {...base} width={16} height={16} className={className}>
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function IconDownload({ className }: IconProps) {
+  return (
+    <svg {...base} width={16} height={16} className={className}>
+      <path d="M12 3v12" />
+      <path d="M7 10l5 5 5-5" />
+      <path d="M4 19h16" />
+    </svg>
+  );
+}

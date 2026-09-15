@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
 import type { Colaborador, EstadoSolicitud, Solicitud, TipoSolicitud } from "@/lib/types";
 import { EstadoBadge } from "@/lib/estado-badge";
+import { IconEye, IconDownload } from "@/components/icons";
 import { FiltrosDashboard } from "./filtros-dashboard";
 import { ExportarExcelBoton } from "./exportar-excel-boton";
 
@@ -62,17 +63,21 @@ export default async function DashboardPage({
   );
 
   const conPdf = lista.filter((s) => s.pdf_url);
-  const firmasPdf = await Promise.all(
-    conPdf.map((s) =>
-      supabase.storage
-        .from("pdfs")
-        .createSignedUrl(s.pdf_url!, 300, { download: `${s.consecutivo}.pdf` })
-    )
-  );
-  const urlsPdf = new Map<string, string>();
+  const [firmasVer, firmasDescargar] = await Promise.all([
+    Promise.all(conPdf.map((s) => supabase.storage.from("pdfs").createSignedUrl(s.pdf_url!, 300))),
+    Promise.all(
+      conPdf.map((s) =>
+        supabase.storage.from("pdfs").createSignedUrl(s.pdf_url!, 300, { download: `${s.consecutivo}.pdf` })
+      )
+    ),
+  ]);
+  const urlsVer = new Map<string, string>();
+  const urlsDescargar = new Map<string, string>();
   conPdf.forEach((s, i) => {
-    const url = firmasPdf[i].data?.signedUrl;
-    if (url) urlsPdf.set(s.id, url);
+    const urlVer = firmasVer[i].data?.signedUrl;
+    const urlDescargar = firmasDescargar[i].data?.signedUrl;
+    if (urlVer) urlsVer.set(s.id, urlVer);
+    if (urlDescargar) urlsDescargar.set(s.id, urlDescargar);
   });
 
   const filasExport = lista.map((s) => ({
@@ -147,10 +152,27 @@ export default async function DashboardPage({
                   {new Date(s.creado_en).toLocaleDateString("es-CO")}
                 </td>
                 <td>
-                  {urlsPdf.has(s.id) ? (
-                    <a href={urlsPdf.get(s.id)} target="_blank" rel="noreferrer" className="btn btn-ghost btn-sm">
-                      Ver
-                    </a>
+                  {urlsVer.has(s.id) ? (
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <a
+                        href={urlsVer.get(s.id)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-ghost btn-sm"
+                        title="Ver PDF"
+                        aria-label="Ver PDF"
+                      >
+                        <IconEye />
+                      </a>
+                      <a
+                        href={urlsDescargar.get(s.id)}
+                        className="btn btn-ghost btn-sm"
+                        title="Descargar PDF"
+                        aria-label="Descargar PDF"
+                      >
+                        <IconDownload />
+                      </a>
+                    </div>
                   ) : (
                     "—"
                   )}
