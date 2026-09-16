@@ -91,21 +91,19 @@ export default async function DashboardPage({
   );
 
   const conPdf = lista.filter((s) => s.pdf_url);
-  const [firmasVer, firmasDescargar] = await Promise.all([
-    Promise.all(conPdf.map((s) => supabase.storage.from("pdfs").createSignedUrl(s.pdf_url!, 300))),
-    Promise.all(
-      conPdf.map((s) =>
-        supabase.storage.from("pdfs").createSignedUrl(s.pdf_url!, 300, { download: `${s.consecutivo}.pdf` })
+  const { data: firmas } = conPdf.length
+    ? await supabase.storage.from("pdfs").createSignedUrls(
+        conPdf.map((s) => s.pdf_url!),
+        300
       )
-    ),
-  ]);
+    : { data: [] as { path: string | null; signedUrl: string | null }[] };
   const urlsVer = new Map<string, string>();
   const urlsDescargar = new Map<string, string>();
   conPdf.forEach((s, i) => {
-    const urlVer = firmasVer[i].data?.signedUrl;
-    const urlDescargar = firmasDescargar[i].data?.signedUrl;
-    if (urlVer) urlsVer.set(s.id, urlVer);
-    if (urlDescargar) urlsDescargar.set(s.id, urlDescargar);
+    const url = firmas?.[i]?.signedUrl;
+    if (!url) return;
+    urlsVer.set(s.id, url);
+    urlsDescargar.set(s.id, `${url}&download=${encodeURIComponent(`${s.consecutivo}.pdf`)}`);
   });
 
   const idsPermiso = lista.filter((s) => s.tipo === "permiso").map((s) => s.id);
