@@ -13,6 +13,7 @@ import type {
 import { EstadoBadge } from "@/lib/estado-badge";
 import { IconEye, IconDownload } from "@/components/icons";
 import { FiltrosDashboard } from "./filtros-dashboard";
+import { RangosTiempoDashboard } from "./rangos-tiempo-dashboard";
 import { ExportarExcelBoton } from "./exportar-excel-boton";
 
 const TIPO_LABEL: Record<TipoSolicitud, string> = {
@@ -175,6 +176,33 @@ export default async function DashboardPage({
   const aprobadas = lista.filter((s) => s.estado === "aprobada").length;
   const rechazadas = lista.filter((s) => s.estado === "rechazada").length;
 
+  const vacacionesOtorgadas = lista.filter((s) => s.tipo === "vacaciones" && s.estado === "aprobada");
+  const diasVacacionesOtorgados = vacacionesOtorgadas.reduce((total, s) => {
+    const d = mapaVacaciones.get(s.id);
+    if (!d) return total;
+    const dias = Math.round(
+      (new Date(d.fecha_hasta).getTime() - new Date(d.fecha_desde).getTime()) / 86400000
+    ) + 1;
+    return total + Math.max(dias, 0);
+  }, 0);
+
+  const permisosOtorgados = lista.filter((s) => s.tipo === "permiso" && s.estado === "aprobada");
+  const diasPermisosOtorgados = permisosOtorgados.reduce(
+    (total, s) => total + (mapaPermiso.get(s.id)?.dias_concedidos ?? 0),
+    0
+  );
+  const horasPermisosOtorgados = permisosOtorgados.reduce(
+    (total, s) => total + (mapaPermiso.get(s.id)?.horas_concedidas ?? 0),
+    0
+  );
+  const tiposPermisosOtorgados = new Map<string, number>();
+  permisosOtorgados.forEach((s) => {
+    const detalle = mapaPermiso.get(s.id);
+    if (!detalle) return;
+    const label = TIPO_PERMISO_LABEL[detalle.tipo_permiso];
+    tiposPermisosOtorgados.set(label, (tiposPermisosOtorgados.get(label) ?? 0) + 1);
+  });
+
   return (
     <div>
       <div style={{ marginBottom: 24 }}>
@@ -203,9 +231,42 @@ export default async function DashboardPage({
         </div>
       </div>
 
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-label">Días de vacaciones otorgados</div>
+          <div className="stat-value">{diasVacacionesOtorgados}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Días de permisos otorgados</div>
+          <div className="stat-value">{diasPermisosOtorgados}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Horas de permisos otorgadas</div>
+          <div className="stat-value">{Math.round(horasPermisosOtorgados * 10) / 10}</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Tipos de permisos otorgados</div>
+          {tiposPermisosOtorgados.size === 0 ? (
+            <div className="stat-value">0</div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {[...tiposPermisosOtorgados.entries()].map(([label, cantidad]) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 13 }}>
+                  <span style={{ color: "var(--muted)" }}>{label}</span>
+                  <span style={{ fontWeight: 600 }}>{cantidad}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       <div className="table-wrap">
         <div className="table-header">
-          <FiltrosDashboard colaboradores={(colaboradoresDisponibles ?? []) as Colaborador[]} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <RangosTiempoDashboard />
+            <FiltrosDashboard colaboradores={(colaboradoresDisponibles ?? []) as Colaborador[]} />
+          </div>
           <ExportarExcelBoton filas={filasExport} />
         </div>
         <table>
