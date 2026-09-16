@@ -10,6 +10,20 @@ export type FilaExport = {
   lider_aprobador: string;
   radicada: string;
   decidida: string;
+  area: string;
+  cargo: string;
+  fecha_desde: string;
+  fecha_hasta: string;
+  hora_desde: string;
+  hora_hasta: string;
+  dias_concedidos: number | string;
+  horas_concedidas: number | string;
+  tipo_detalle: string;
+  dias_compensados: number | string;
+  ingreso_a_laborar: string;
+  valor_neto: number | string;
+  transferencia_bancaria: string;
+  descripcion: string;
   motivo_rechazo: string;
 };
 
@@ -29,6 +43,20 @@ export function ExportarExcelBoton({ filas }: { filas: FilaExport[] }) {
         "Líder aprobador": f.lider_aprobador,
         Radicada: f.radicada,
         Decidida: f.decidida,
+        Área: f.area,
+        Cargo: f.cargo,
+        "Fecha desde": f.fecha_desde,
+        "Fecha hasta": f.fecha_hasta,
+        "Hora desde": f.hora_desde,
+        "Hora hasta": f.hora_hasta,
+        "Días concedidos": f.dias_concedidos,
+        "Horas concedidas": f.horas_concedidas,
+        "Tipo específico": f.tipo_detalle,
+        "Días compensados": f.dias_compensados,
+        "Ingreso a laborar": f.ingreso_a_laborar,
+        "Valor neto": f.valor_neto,
+        "Transferencia bancaria": f.transferencia_bancaria,
+        "Descripción / Observaciones": f.descripcion,
         "Motivo de rechazo": f.motivo_rechazo,
       }));
 
@@ -41,6 +69,20 @@ export function ExportarExcelBoton({ filas }: { filas: FilaExport[] }) {
         { wch: 24 },
         { wch: 12 },
         { wch: 12 },
+        { wch: 16 },
+        { wch: 16 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 10 },
+        { wch: 10 },
+        { wch: 14 },
+        { wch: 14 },
+        { wch: 14 },
+        { wch: 14 },
+        { wch: 14 },
+        { wch: 12 },
+        { wch: 14 },
+        { wch: 34 },
         { wch: 30 },
       ];
 

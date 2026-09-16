@@ -1,7 +1,15 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
-import type { Colaborador, EstadoSolicitud, Solicitud, TipoSolicitud } from "@/lib/types";
+import type {
+  Colaborador,
+  EstadoSolicitud,
+  Solicitud,
+  SolicitudNominaDetalle,
+  SolicitudPermisoDetalle,
+  SolicitudVacacionesDetalle,
+  TipoSolicitud,
+} from "@/lib/types";
 import { EstadoBadge } from "@/lib/estado-badge";
 import { IconEye, IconDownload } from "@/components/icons";
 import { FiltrosDashboard } from "./filtros-dashboard";
@@ -18,6 +26,25 @@ const ESTADO_LABEL: Record<EstadoSolicitud, string> = {
   aprobada: "Aprobada",
   rechazada: "Rechazada",
   cancelada: "Cancelada",
+};
+
+const TIPO_PERMISO_LABEL: Record<SolicitudPermisoDetalle["tipo_permiso"], string> = {
+  medico: "Médico",
+  personal: "Personal",
+  escolar: "Escolar",
+  judicial: "Judicial",
+};
+
+const TIPO_VACACIONES_LABEL: Record<SolicitudVacacionesDetalle["tipo_vacaciones"], string> = {
+  compensadas: "Compensadas",
+  disfrutadas: "Disfrutadas",
+  mixtas: "Mixtas",
+};
+
+const TIPO_ADELANTO_LABEL: Record<SolicitudNominaDetalle["tipo_adelanto"], string> = {
+  nomina: "Nómina",
+  prima: "Prima",
+  cuenta_cobro: "Cuenta de cobro",
 };
 
 export default async function DashboardPage({
@@ -80,16 +107,69 @@ export default async function DashboardPage({
     if (urlDescargar) urlsDescargar.set(s.id, urlDescargar);
   });
 
-  const filasExport = lista.map((s) => ({
-    consecutivo: s.consecutivo,
-    colaborador: mapaColaboradores.get(s.colaborador_id)?.nombre_completo ?? "—",
-    tipo: TIPO_LABEL[s.tipo],
-    estado: ESTADO_LABEL[s.estado],
-    lider_aprobador: mapaColaboradores.get(s.lider_aprobador_id)?.nombre_completo ?? "—",
-    radicada: new Date(s.creado_en).toLocaleDateString("es-CO"),
-    decidida: s.decidido_en ? new Date(s.decidido_en).toLocaleDateString("es-CO") : "—",
-    motivo_rechazo: s.motivo_rechazo ?? "",
-  }));
+  const idsPermiso = lista.filter((s) => s.tipo === "permiso").map((s) => s.id);
+  const idsVacaciones = lista.filter((s) => s.tipo === "vacaciones").map((s) => s.id);
+  const idsNomina = lista.filter((s) => s.tipo === "nomina").map((s) => s.id);
+
+  const [{ data: permisoDetalles }, { data: vacacionesDetalles }, { data: nominaDetalles }] =
+    await Promise.all([
+      idsPermiso.length
+        ? supabase.from("solicitud_permiso").select("*").in("solicitud_id", idsPermiso)
+        : Promise.resolve({ data: [] as SolicitudPermisoDetalle[] }),
+      idsVacaciones.length
+        ? supabase.from("solicitud_vacaciones").select("*").in("solicitud_id", idsVacaciones)
+        : Promise.resolve({ data: [] as SolicitudVacacionesDetalle[] }),
+      idsNomina.length
+        ? supabase.from("solicitud_nomina").select("*").in("solicitud_id", idsNomina)
+        : Promise.resolve({ data: [] as SolicitudNominaDetalle[] }),
+    ]);
+
+  const mapaPermiso = new Map(
+    ((permisoDetalles ?? []) as SolicitudPermisoDetalle[]).map((d) => [d.solicitud_id, d])
+  );
+  const mapaVacaciones = new Map(
+    ((vacacionesDetalles ?? []) as SolicitudVacacionesDetalle[]).map((d) => [d.solicitud_id, d])
+  );
+  const mapaNomina = new Map(
+    ((nominaDetalles ?? []) as SolicitudNominaDetalle[]).map((d) => [d.solicitud_id, d])
+  );
+
+  const filasExport = lista.map((s) => {
+    const permiso = mapaPermiso.get(s.id);
+    const vacaciones = mapaVacaciones.get(s.id);
+    const nomina = mapaNomina.get(s.id);
+
+    return {
+      consecutivo: s.consecutivo,
+      colaborador: mapaColaboradores.get(s.colaborador_id)?.nombre_completo ?? "—",
+      tipo: TIPO_LABEL[s.tipo],
+      estado: ESTADO_LABEL[s.estado],
+      lider_aprobador: mapaColaboradores.get(s.lider_aprobador_id)?.nombre_completo ?? "—",
+      radicada: new Date(s.creado_en).toLocaleDateString("es-CO"),
+      decidida: s.decidido_en ? new Date(s.decidido_en).toLocaleDateString("es-CO") : "—",
+      area: permiso?.area ?? vacaciones?.area ?? "",
+      cargo: permiso?.cargo_actual ?? vacaciones?.cargo_actual ?? nomina?.cargo ?? "",
+      fecha_desde: permiso?.fecha_desde ?? vacaciones?.fecha_desde ?? "",
+      fecha_hasta: permiso?.fecha_hasta ?? vacaciones?.fecha_hasta ?? "",
+      hora_desde: permiso?.hora_desde ?? "",
+      hora_hasta: permiso?.hora_hasta ?? "",
+      dias_concedidos: permiso?.dias_concedidos ?? "",
+      horas_concedidas: permiso?.horas_concedidas ?? "",
+      tipo_detalle: permiso
+        ? TIPO_PERMISO_LABEL[permiso.tipo_permiso]
+        : vacaciones
+          ? TIPO_VACACIONES_LABEL[vacaciones.tipo_vacaciones]
+          : nomina
+            ? TIPO_ADELANTO_LABEL[nomina.tipo_adelanto]
+            : "",
+      dias_compensados: vacaciones?.dias_compensados ?? "",
+      ingreso_a_laborar: vacaciones?.ingreso_a_laborar ?? "",
+      valor_neto: nomina?.valor_neto ?? "",
+      transferencia_bancaria: nomina ? (nomina.transferencia_bancaria ? "Sí" : "No") : "",
+      descripcion: permiso?.descripcion ?? vacaciones?.observaciones ?? "",
+      motivo_rechazo: s.motivo_rechazo ?? "",
+    };
+  });
 
   const pendientes = lista.filter((s) => s.estado === "pendiente").length;
   const aprobadas = lista.filter((s) => s.estado === "aprobada").length;
