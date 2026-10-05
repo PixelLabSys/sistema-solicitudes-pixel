@@ -92,6 +92,14 @@ export function PermisoForm({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     setError(null);
+    if (String(formData.get("fecha_hasta")) < String(formData.get("fecha_desde"))) {
+      setError("La fecha hasta no puede ser anterior a la fecha desde.");
+      return;
+    }
+    if (String(formData.get("hora_hasta")) <= String(formData.get("hora_desde"))) {
+      setError("La hora hasta debe ser posterior a la hora desde.");
+      return;
+    }
     startTransition(async () => {
       const rutaFirma = await subirFirma();
       if (!rutaFirma) return;
