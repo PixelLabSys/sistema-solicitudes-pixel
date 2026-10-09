@@ -15,6 +15,16 @@ import {
   alternarCargoActivo,
 } from "@/lib/data/catalogos-actions";
 
+const ultimaActualizacion = new Date(process.env.NEXT_PUBLIC_BUILD_TIME!).toLocaleString("es-CO", {
+  timeZone: "America/Bogota",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: true,
+});
+
 export default async function ConfiguracionPage() {
   const yo = await getColaboradorActual();
   if (!yo?.es_lider_th) {
@@ -105,6 +115,11 @@ export default async function ConfiguracionPage() {
             <p>Agrega el primero desde el formulario de arriba.</p>
           </div>
         )}
+      </div>
+
+      <div style={{ marginTop: 32, textAlign: "center", fontSize: 11, color: "var(--subtle)", lineHeight: 1.7 }}>
+        <p>Pixel Graphic SAS / Área Inteligencia de Negocio ®2026</p>
+        <p>Última actualización: {ultimaActualizacion}</p>
       </div>
     </div>
   );
