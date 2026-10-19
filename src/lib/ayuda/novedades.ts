@@ -14,6 +14,7 @@ export const NOVEDADES: Novedad[] = [
     puntos: [
       "Nueva solicitud de Certificado laboral: la radicas desde el menú y, cuando se aprueba, descargas el PDF firmado.",
       "Nuevo módulo Ayuda con las novedades del sistema y el manual de usuario de tu rol.",
+      "Quien firma los certificados recibe un correo de aviso cada vez que se radica uno nuevo.",
       "Talento Humano ya puede cargar los datos laborales de cada colaborador y definir quién firma los certificados, desde Configuración.",
     ],
   },

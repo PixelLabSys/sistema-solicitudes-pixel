@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
+import { notificarNuevaSolicitud } from "@/lib/email/notificaciones";
+import type { Colaborador } from "@/lib/types";
 
 async function resolverAprobador(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -108,6 +110,16 @@ export async function crearSolicitudCertificado(formData: FormData) {
     evento: "creada",
     actor_id: colaborador.id,
   });
+
+  const { data: aprobador } = await supabase
+    .from("colaborador")
+    .select("*")
+    .eq("id", resuelto.aprobadorId)
+    .single();
+
+  if (aprobador) {
+    await notificarNuevaSolicitud(supabase, solicitud, colaborador as Colaborador, aprobador as Colaborador);
+  }
 
   redirect("/?creada=" + solicitud.consecutivo);
 }

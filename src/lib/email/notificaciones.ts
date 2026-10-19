@@ -29,17 +29,22 @@ export async function notificarNuevaSolicitud(
   lider: Colaborador
 ) {
   try {
+    const esCertificado = solicitud.tipo === "certificado";
+    const asignacion = esCertificado
+      ? "y quedó asignada a ti para aprobarla, porque firmas los certificados laborales"
+      : "y te eligió como líder de proceso";
+
     const html = plantillaCorreo({
       eyebrow: `${TIPO_LABEL[solicitud.tipo]} · ${solicitud.consecutivo}`,
       titulo: "Tienes una solicitud pendiente de aprobación",
       parrafosHtml: `
-        <p style="margin:0 0 12px 0;"><strong style="color:#0b1b29;">${colaborador.nombre_completo}</strong> radicó una solicitud de ${TIPO_LABEL[solicitud.tipo]} y te eligió como líder de proceso.</p>
+        <p style="margin:0 0 12px 0;"><strong style="color:#0b1b29;">${colaborador.nombre_completo}</strong> radicó una solicitud de ${TIPO_LABEL[solicitud.tipo]} ${asignacion}.</p>
         <p style="margin:0;">Ingresa para revisarla y aprobarla o rechazarla.</p>
       `,
       ctaTexto: "Revisar solicitud",
     });
 
-    const text = `${colaborador.nombre_completo} radicó una solicitud de ${TIPO_LABEL[solicitud.tipo]} (${solicitud.consecutivo}) y te eligió como líder de proceso.\n\nIngresa para revisarla: ${APP_URL}`;
+    const text = `${colaborador.nombre_completo} radicó una solicitud de ${TIPO_LABEL[solicitud.tipo]} (${solicitud.consecutivo}) ${asignacion}.\n\nIngresa para revisarla: ${APP_URL}`;
 
     const { error } = await resend.emails.send({
       from: REMITENTE,
@@ -63,6 +68,13 @@ export async function notificarDecision(
 ) {
   try {
     const aprobada = estadoFinal === "aprobada";
+    const esCertificado = solicitud.tipo === "certificado";
+    // Un certificado rechazado no genera PDF, así que no se promete descarga.
+    const cierre = esCertificado
+      ? aprobada
+        ? "Ya puedes descargar tu certificado desde Mis solicitudes."
+        : "Ingresa para ver el detalle. Si lo necesitas, puedes radicar una nueva solicitud."
+      : "Ingresa para ver el detalle y descargar el PDF.";
     const html = plantillaCorreo({
       eyebrow: `${TIPO_LABEL[solicitud.tipo]} · ${solicitud.consecutivo}`,
       titulo: aprobada ? "Tu solicitud fue aprobada" : "Tu solicitud fue rechazada",
@@ -74,14 +86,14 @@ export async function notificarDecision(
             ? `<p style="margin:0 0 12px 0; padding:12px 14px; background:#fef2f2; border-radius:8px; color:#991b1b;">Motivo: ${motivo}</p>`
             : ""
         }
-        <p style="margin:0;">Ingresa para ver el detalle y descargar el PDF.</p>
+        <p style="margin:0;">${cierre}</p>
       `,
-      ctaTexto: "Ver mi solicitud",
+      ctaTexto: esCertificado && aprobada ? "Descargar mi certificado" : "Ver mi solicitud",
     });
 
     const text = `Tu solicitud de ${TIPO_LABEL[solicitud.tipo]} ${solicitud.consecutivo} fue ${estadoFinal}.${
       !aprobada && motivo ? `\n\nMotivo: ${motivo}` : ""
-    }\n\nIngresa para ver el detalle: ${APP_URL}`;
+    }\n\n${cierre} ${APP_URL}`;
 
     const { error } = await resend.emails.send({
       from: REMITENTE,

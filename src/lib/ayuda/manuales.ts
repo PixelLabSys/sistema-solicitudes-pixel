@@ -88,7 +88,7 @@ export const MANUALES: Record<RolAyuda, Manual> = {
       {
         titulo: "Cómo te llegan las solicitudes",
         parrafo:
-          "Cuando un colaborador te elige como líder de proceso, la solicitud aparece en tu Bandeja de aprobación. No puedes aprobar tus propias solicitudes: esas se asignan a otra persona.",
+          "Cuando un colaborador te elige como líder de proceso, te llega un correo de aviso y la solicitud aparece en tu Bandeja de aprobación. No puedes aprobar tus propias solicitudes: esas se asignan a otra persona.",
       },
       {
         titulo: "Aprobar o rechazar",
