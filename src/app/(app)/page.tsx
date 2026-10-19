@@ -73,9 +73,11 @@ export default async function MisSolicitudesPage() {
                 <td style={{ display: "flex", gap: 8 }}>
                   {s.estado === "pendiente" && (
                     <>
-                      <Link href={`/solicitudes/editar/${s.id}`} className="btn btn-ghost btn-sm">
-                        Editar
-                      </Link>
+                      {s.tipo !== "certificado" && (
+                        <Link href={`/solicitudes/editar/${s.id}`} className="btn btn-ghost btn-sm">
+                          Editar
+                        </Link>
+                      )}
                       <CancelarBoton solicitudId={s.id} />
                     </>
                   )}

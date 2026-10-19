@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
+import { VERSION_ACTUAL } from "@/lib/ayuda/novedades";
 import { AppShell } from "./app-shell";
 
 export default async function AppLayout({
@@ -46,6 +47,7 @@ export default async function AppLayout({
     <AppShell
       esLiderArea={colaborador.es_lider_area}
       esLiderTh={colaborador.es_lider_th}
+      hayNovedadAyuda={colaborador.ayuda_version_vista !== VERSION_ACTUAL}
       nombreCompleto={colaborador.nombre_completo}
       rol={rol}
       avatarUrl={colaborador.avatar_url}

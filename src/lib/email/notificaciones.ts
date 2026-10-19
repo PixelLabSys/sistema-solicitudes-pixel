@@ -11,6 +11,7 @@ const TIPO_LABEL: Record<Solicitud["tipo"], string> = {
   permiso: "Permiso",
   vacaciones: "Vacaciones",
   nomina: "Adelanto de Nómina",
+  certificado: "Certificado Laboral",
 };
 
 async function registrarEvento(

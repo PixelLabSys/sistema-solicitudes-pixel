@@ -139,3 +139,91 @@ export async function alternarActivo(colaboradorId: string, activo: boolean) {
   revalidatePath("/configuracion");
   return { error: null };
 }
+
+const TIPOS_CONTRATO = ["indefinido", "fijo", "obra_labor", "aprendizaje"];
+
+export async function guardarDatosLaborales(
+  colaboradorId: string,
+  datos: { genero: string; fecha_ingreso: string; tipo_contrato: string; salario: string }
+) {
+  await requireLiderTh();
+  const supabase = await createClient();
+
+  const salario = Number(datos.salario.replace(/[^\d]/g, ""));
+
+  if (datos.genero !== "masculino" && datos.genero !== "femenino") {
+    return { error: "Selecciona el género." };
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(datos.fecha_ingreso) || datos.fecha_ingreso > new Date().toISOString().slice(0, 10)) {
+    return { error: "La fecha de ingreso es obligatoria y no puede ser futura." };
+  }
+  if (!TIPOS_CONTRATO.includes(datos.tipo_contrato)) {
+    return { error: "Selecciona el tipo de contrato." };
+  }
+  if (!Number.isFinite(salario) || salario <= 0) {
+    return { error: "El salario debe ser un valor mayor a 0." };
+  }
+
+  const { error: errorContrato } = await supabase.from("colaborador_contrato").upsert({
+    colaborador_id: colaboradorId,
+    fecha_ingreso: datos.fecha_ingreso,
+    tipo_contrato: datos.tipo_contrato,
+    salario,
+    actualizado_en: new Date().toISOString(),
+  });
+  if (errorContrato) return { error: errorContrato.message };
+
+  const { error: errorGenero } = await supabase
+    .from("colaborador")
+    .update({ genero: datos.genero })
+    .eq("id", colaboradorId);
+  if (errorGenero) return { error: errorGenero.message };
+
+  revalidatePath("/configuracion");
+  return { error: null };
+}
+
+export async function guardarConfigCertificado(datos: {
+  firmante_id: string;
+  cargo: string;
+  telefono: string;
+  firma_path: string | null;
+}) {
+  await requireLiderTh();
+  const supabase = await createClient();
+
+  const cargo = datos.cargo.trim();
+  const telefono = datos.telefono.trim();
+
+  if (!datos.firmante_id) return { error: "Selecciona quién firma los certificados." };
+  if (!cargo || !telefono) return { error: "El cargo y el teléfono son obligatorios." };
+
+  const { data: firmante } = await supabase
+    .from("colaborador")
+    .select("id")
+    .eq("id", datos.firmante_id)
+    .eq("activo", true)
+    .maybeSingle();
+  if (!firmante) return { error: "La persona seleccionada no existe o está inactiva." };
+
+  const { error: errorConfig } = await supabase.from("certificado_config").upsert({
+    id: true,
+    firmante_id: datos.firmante_id,
+    firmante_cargo: cargo,
+    firmante_telefono: telefono,
+    actualizado_en: new Date().toISOString(),
+  });
+  if (errorConfig) return { error: errorConfig.message };
+
+  if (datos.firma_path) {
+    const { error: errorFirma } = await supabase.from("certificado_firma").upsert({
+      id: true,
+      firma_path: datos.firma_path,
+      actualizado_en: new Date().toISOString(),
+    });
+    if (errorFirma) return { error: errorFirma.message };
+  }
+
+  revalidatePath("/configuracion");
+  return { error: null };
+}

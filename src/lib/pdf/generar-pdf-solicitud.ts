@@ -23,6 +23,7 @@ const TITULOS: Record<Solicitud["tipo"], string> = {
   permiso: "Solicitud de Permiso",
   vacaciones: "Solicitud de Vacaciones",
   nomina: "Solicitud de Adelanto de Nómina",
+  certificado: "Certificado Laboral",
 };
 
 const TIPOS_PERMISO_LABEL: Record<string, string> = {

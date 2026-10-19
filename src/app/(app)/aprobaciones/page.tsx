@@ -23,12 +23,13 @@ export default async function AprobacionesPage() {
   const colaboradorIds = [...new Set(lista.map((s) => s.colaborador_id))];
   const solicitudIds = lista.length ? lista.map((s) => s.id) : IDS_VACIOS;
 
-  const [{ data: colaboradores }, { data: permisos }, { data: vacaciones }, { data: nominas }] =
+  const [{ data: colaboradores }, { data: permisos }, { data: vacaciones }, { data: nominas }, { data: certificados }] =
     await Promise.all([
       supabase.from("colaborador").select("*").in("id", colaboradorIds.length ? colaboradorIds : IDS_VACIOS),
       supabase.from("solicitud_permiso").select("*").in("solicitud_id", solicitudIds),
       supabase.from("solicitud_vacaciones").select("*").in("solicitud_id", solicitudIds),
       supabase.from("solicitud_nomina").select("*").in("solicitud_id", solicitudIds),
+      supabase.from("solicitud_certificado").select("*").in("solicitud_id", solicitudIds),
     ]);
 
   const mapaColaboradores = new Map(
@@ -37,6 +38,7 @@ export default async function AprobacionesPage() {
   const mapaPermisos = new Map((permisos ?? []).map((p) => [p.solicitud_id, p]));
   const mapaVacaciones = new Map((vacaciones ?? []).map((v) => [v.solicitud_id, v]));
   const mapaNominas = new Map((nominas ?? []).map((n) => [n.solicitud_id, n]));
+  const mapaCertificados = new Map((certificados ?? []).map((c) => [c.solicitud_id, c]));
 
   const conSoporte = (permisos ?? []).filter((p) => p.soporte_url);
   const firmasSoporte = await Promise.all(
@@ -74,6 +76,7 @@ export default async function AprobacionesPage() {
               permiso={mapaPermisos.get(s.id)}
               vacaciones={mapaVacaciones.get(s.id)}
               nomina={mapaNominas.get(s.id)}
+              certificado={mapaCertificados.get(s.id)}
               urlSoporte={mapaSoportes.get(s.id)}
             />
           ))}

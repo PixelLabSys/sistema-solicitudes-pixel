@@ -8,10 +8,22 @@ export type Colaborador = {
   es_lider_th: boolean;
   es_lider_general: boolean;
   activo: boolean;
+  genero: "masculino" | "femenino" | null;
+  ayuda_version_vista: string | null;
   creado_en: string;
 };
 
-export type TipoSolicitud = "permiso" | "vacaciones" | "nomina";
+export type TipoContrato = "indefinido" | "fijo" | "obra_labor" | "aprendizaje";
+
+export type ColaboradorContrato = {
+  colaborador_id: string;
+  fecha_ingreso: string;
+  tipo_contrato: TipoContrato;
+  salario: number;
+  actualizado_en: string;
+};
+
+export type TipoSolicitud = "permiso" | "vacaciones" | "nomina" | "certificado";
 export type EstadoSolicitud = "pendiente" | "aprobada" | "rechazada" | "cancelada";
 
 export type Solicitud = {
@@ -76,4 +88,20 @@ export type SolicitudNominaDetalle = {
   tipo_adelanto: "nomina" | "prima" | "cuenta_cobro";
   valor_neto: number;
   transferencia_bancaria: boolean;
+};
+
+export type SolicitudCertificadoDetalle = {
+  solicitud_id: string;
+  destinatario: string;
+  cargo: string;
+  motivo: string;
+  incluir_salario: boolean;
+};
+
+export type CertificadoConfig = {
+  id: boolean;
+  firmante_id: string | null;
+  firmante_cargo: string | null;
+  firmante_telefono: string | null;
+  actualizado_en: string;
 };

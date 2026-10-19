@@ -5,6 +5,7 @@ import type {
   Colaborador,
   EstadoSolicitud,
   Solicitud,
+  SolicitudCertificadoDetalle,
   SolicitudNominaDetalle,
   SolicitudPermisoDetalle,
   SolicitudVacacionesDetalle,
@@ -20,6 +21,7 @@ const TIPO_LABEL: Record<TipoSolicitud, string> = {
   permiso: "Permiso",
   vacaciones: "Vacaciones",
   nomina: "Adelanto",
+  certificado: "Certificado",
 };
 
 const ESTADO_LABEL: Record<EstadoSolicitud, string> = {
@@ -109,8 +111,9 @@ export default async function DashboardPage({
   const idsPermiso = lista.filter((s) => s.tipo === "permiso").map((s) => s.id);
   const idsVacaciones = lista.filter((s) => s.tipo === "vacaciones").map((s) => s.id);
   const idsNomina = lista.filter((s) => s.tipo === "nomina").map((s) => s.id);
+  const idsCertificado = lista.filter((s) => s.tipo === "certificado").map((s) => s.id);
 
-  const [{ data: permisoDetalles }, { data: vacacionesDetalles }, { data: nominaDetalles }] =
+  const [{ data: permisoDetalles }, { data: vacacionesDetalles }, { data: nominaDetalles }, { data: certificadoDetalles }] =
     await Promise.all([
       idsPermiso.length
         ? supabase.from("solicitud_permiso").select("*").in("solicitud_id", idsPermiso)
@@ -121,6 +124,9 @@ export default async function DashboardPage({
       idsNomina.length
         ? supabase.from("solicitud_nomina").select("*").in("solicitud_id", idsNomina)
         : Promise.resolve({ data: [] as SolicitudNominaDetalle[] }),
+      idsCertificado.length
+        ? supabase.from("solicitud_certificado").select("*").in("solicitud_id", idsCertificado)
+        : Promise.resolve({ data: [] as SolicitudCertificadoDetalle[] }),
     ]);
 
   const mapaPermiso = new Map(
@@ -132,11 +138,15 @@ export default async function DashboardPage({
   const mapaNomina = new Map(
     ((nominaDetalles ?? []) as SolicitudNominaDetalle[]).map((d) => [d.solicitud_id, d])
   );
+  const mapaCertificado = new Map(
+    ((certificadoDetalles ?? []) as SolicitudCertificadoDetalle[]).map((d) => [d.solicitud_id, d])
+  );
 
   const filasExport = lista.map((s) => {
     const permiso = mapaPermiso.get(s.id);
     const vacaciones = mapaVacaciones.get(s.id);
     const nomina = mapaNomina.get(s.id);
+    const certificado = mapaCertificado.get(s.id);
 
     return {
       consecutivo: s.consecutivo,
@@ -147,7 +157,7 @@ export default async function DashboardPage({
       radicada: new Date(s.creado_en).toLocaleDateString("es-CO"),
       decidida: s.decidido_en ? new Date(s.decidido_en).toLocaleDateString("es-CO") : "—",
       area: permiso?.area ?? vacaciones?.area ?? "",
-      cargo: permiso?.cargo_actual ?? vacaciones?.cargo_actual ?? nomina?.cargo ?? "",
+      cargo: permiso?.cargo_actual ?? vacaciones?.cargo_actual ?? nomina?.cargo ?? certificado?.cargo ?? "",
       fecha_desde: permiso?.fecha_desde ?? vacaciones?.fecha_desde ?? "",
       fecha_hasta: permiso?.fecha_hasta ?? vacaciones?.fecha_hasta ?? "",
       hora_desde: permiso?.hora_desde ?? "",
@@ -160,12 +170,19 @@ export default async function DashboardPage({
           ? TIPO_VACACIONES_LABEL[vacaciones.tipo_vacaciones]
           : nomina
             ? TIPO_ADELANTO_LABEL[nomina.tipo_adelanto]
-            : "",
+            : certificado
+              ? certificado.incluir_salario
+                ? "Con salario"
+                : "Sin salario"
+              : "",
       dias_compensados: vacaciones?.dias_compensados ?? "",
       ingreso_a_laborar: vacaciones?.ingreso_a_laborar ?? "",
       valor_neto: nomina?.valor_neto ?? "",
       transferencia_bancaria: nomina ? (nomina.transferencia_bancaria ? "Sí" : "No") : "",
-      descripcion: permiso?.descripcion ?? vacaciones?.observaciones ?? "",
+      descripcion:
+        permiso?.descripcion ??
+        vacaciones?.observaciones ??
+        (certificado ? `Dirigido a ${certificado.destinatario}. Motivo: ${certificado.motivo}` : ""),
       motivo_rechazo: s.motivo_rechazo ?? "",
     };
   });

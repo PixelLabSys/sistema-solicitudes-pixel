@@ -7,6 +7,8 @@ import {
   IconPermiso,
   IconVacaciones,
   IconAdelanto,
+  IconAyuda,
+  IconCertificado,
   IconAprobacion,
   IconDashboard,
   IconConfiguracion,
@@ -15,10 +17,12 @@ import {
 export function NavSidebar({
   esLiderArea,
   esLiderTh,
+  hayNovedadAyuda,
   onNavigate,
 }: {
   esLiderArea: boolean;
   esLiderTh: boolean;
+  hayNovedadAyuda: boolean;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
@@ -37,6 +41,7 @@ export function NavSidebar({
       {item("/solicitudes/nueva/permiso", "Nueva: Permiso", IconPermiso)}
       {item("/solicitudes/nueva/vacaciones", "Nueva: Vacaciones", IconVacaciones)}
       {item("/solicitudes/nueva/nomina", "Nueva: Adelanto", IconAdelanto)}
+      {item("/solicitudes/nueva/certificado", "Nueva: Certificado Laboral", IconCertificado)}
 
       {esLiderArea && (
         <>
@@ -53,6 +58,16 @@ export function NavSidebar({
           {item("/configuracion", "Configuración", IconConfiguracion)}
         </>
       )}
+
+      <Link href="/ayuda" className={`nav-item ${pathname === "/ayuda" ? "active" : ""}`} onClick={onNavigate}>
+        <IconAyuda className="nav-icon" />
+        Ayuda
+        {hayNovedadAyuda && (
+          <span className="nav-badge" aria-label="Hay novedades sin leer">
+            1
+          </span>
+        )}
+      </Link>
     </nav>
   );
 }

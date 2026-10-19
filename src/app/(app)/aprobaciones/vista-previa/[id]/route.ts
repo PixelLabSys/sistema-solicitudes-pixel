@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
 import { generarPdfSolicitud } from "@/lib/pdf/generar-pdf-solicitud";
+import { construirPdfCertificado } from "@/lib/pdf/construir-certificado";
 import type {
   Colaborador,
   Solicitud,
@@ -23,6 +24,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   if (!solicitud) return NextResponse.json({ error: "Solicitud no encontrada." }, { status: 404 });
 
   const s = solicitud as Solicitud;
+
+  if (s.tipo === "certificado") {
+    const resultado = await construirPdfCertificado(supabase, s, s.estado === "pendiente");
+    if ("error" in resultado) return NextResponse.json({ error: resultado.error }, { status: 400 });
+    return new NextResponse(Buffer.from(resultado.pdf), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `inline; filename="${s.consecutivo}.pdf"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  }
 
   const { data: colaborador } = await supabase
     .from("colaborador")

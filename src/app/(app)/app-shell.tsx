@@ -8,6 +8,7 @@ import { NavSidebar } from "./nav-sidebar";
 export function AppShell({
   esLiderArea,
   esLiderTh,
+  hayNovedadAyuda,
   nombreCompleto,
   rol,
   avatarUrl,
@@ -15,6 +16,7 @@ export function AppShell({
 }: {
   esLiderArea: boolean;
   esLiderTh: boolean;
+  hayNovedadAyuda: boolean;
   nombreCompleto: string;
   rol: string;
   avatarUrl?: string | null;
@@ -52,7 +54,7 @@ export function AppShell({
           </button>
         </div>
 
-        <NavSidebar esLiderArea={esLiderArea} esLiderTh={esLiderTh} onNavigate={() => setOpen(false)} />
+        <NavSidebar esLiderArea={esLiderArea} esLiderTh={esLiderTh} hayNovedadAyuda={hayNovedadAyuda} onNavigate={() => setOpen(false)} />
 
         <div className="sidebar-bottom">
           <button

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import type {
   Colaborador,
   Solicitud,
+  SolicitudCertificadoDetalle,
   SolicitudNominaDetalle,
   SolicitudPermisoDetalle,
   SolicitudVacacionesDetalle,
@@ -19,11 +20,13 @@ function Detalle({
   permiso,
   vacaciones,
   nomina,
+  certificado,
 }: {
   solicitud: Solicitud;
   permiso?: SolicitudPermisoDetalle;
   vacaciones?: SolicitudVacacionesDetalle;
   nomina?: SolicitudNominaDetalle;
+  certificado?: SolicitudCertificadoDetalle;
 }) {
   if (solicitud.tipo === "permiso" && permiso) {
     return (
@@ -56,6 +59,14 @@ function Detalle({
       </>
     );
   }
+  if (solicitud.tipo === "certificado" && certificado) {
+    return (
+      <>
+        Certificado laboral · Dirigido a {certificado.destinatario} · {certificado.cargo}
+        {certificado.incluir_salario ? " · incluye salario" : " · sin salario"}
+      </>
+    );
+  }
   return null;
 }
 
@@ -65,6 +76,7 @@ export function AprobacionRow({
   permiso,
   vacaciones,
   nomina,
+  certificado,
   urlSoporte,
 }: {
   solicitud: Solicitud;
@@ -72,6 +84,7 @@ export function AprobacionRow({
   permiso?: SolicitudPermisoDetalle;
   vacaciones?: SolicitudVacacionesDetalle;
   nomina?: SolicitudNominaDetalle;
+  certificado?: SolicitudCertificadoDetalle;
   urlSoporte?: string;
 }) {
   const [mostrarRechazo, setMostrarRechazo] = useState(false);
@@ -103,7 +116,7 @@ export function AprobacionRow({
             {solicitud.consecutivo} · {colaborador?.nombre_completo}
           </p>
           <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 4 }}>
-            <Detalle solicitud={solicitud} permiso={permiso} vacaciones={vacaciones} nomina={nomina} />
+            <Detalle solicitud={solicitud} permiso={permiso} vacaciones={vacaciones} nomina={nomina} certificado={certificado} />
           </p>
           {solicitud.tipo === "permiso" && permiso?.descripcion && (
             <p style={{ fontSize: 12, color: "var(--subtle)", marginTop: 4 }}>
@@ -113,6 +126,11 @@ export function AprobacionRow({
           {solicitud.tipo === "vacaciones" && vacaciones?.observaciones && (
             <p style={{ fontSize: 12, color: "var(--subtle)", marginTop: 4 }}>
               {vacaciones.observaciones}
+            </p>
+          )}
+          {solicitud.tipo === "certificado" && certificado?.motivo && (
+            <p style={{ fontSize: 12, color: "var(--subtle)", marginTop: 4 }}>
+              Motivo: {certificado.motivo}
             </p>
           )}
           {error && !mostrarRechazo && (

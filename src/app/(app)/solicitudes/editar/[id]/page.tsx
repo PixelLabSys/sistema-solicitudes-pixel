@@ -14,7 +14,7 @@ import { PermisoForm } from "../../nueva/permiso/permiso-form";
 import { VacacionesForm } from "../../nueva/vacaciones/vacaciones-form";
 import { NominaForm } from "../../nueva/nomina/nomina-form";
 
-const TITULOS = {
+const TITULOS: Record<"permiso" | "vacaciones" | "nomina", string> = {
   permiso: "Editar solicitud de permiso",
   vacaciones: "Editar solicitud de vacaciones",
   nomina: "Editar solicitud de adelanto de nómina",
@@ -42,6 +42,7 @@ export default async function EditarSolicitudPage({
   }
 
   const s = solicitud as Solicitud;
+  if (s.tipo === "certificado") notFound();
 
   const [{ data: lideres }, { data: areas }, { data: cargos }, { count: liderGeneralCount }] = await Promise.all([
     supabase

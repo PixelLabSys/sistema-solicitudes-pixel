@@ -37,6 +37,7 @@ export function FiltrosDashboard({ colaboradores }: { colaboradores: Colaborador
         <option value="permiso">Permiso</option>
         <option value="vacaciones">Vacaciones</option>
         <option value="nomina">Adelanto de nómina</option>
+        <option value="certificado">Certificado laboral</option>
       </select>
       <select
         className="form-select"

@@ -50,6 +50,27 @@ export function IconAdelanto({ className }: IconProps) {
   );
 }
 
+export function IconCertificado({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" />
+      <path d="M14 3v6h6" />
+      <circle cx="12" cy="15" r="2.5" />
+      <path d="M10.8 17.2 10 20l2-1 2 1-.8-2.8" />
+    </svg>
+  );
+}
+
+export function IconAyuda({ className }: IconProps) {
+  return (
+    <svg {...base} className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8" />
+      <circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconAprobacion({ className }: IconProps) {
   return (
     <svg {...base} className={className}>

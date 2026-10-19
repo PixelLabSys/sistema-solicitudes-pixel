@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
 import { generarPdfSolicitud } from "@/lib/pdf/generar-pdf-solicitud";
+import { construirPdfCertificado } from "@/lib/pdf/construir-certificado";
 import { notificarDecision, notificarLiderTH } from "@/lib/email/notificaciones";
 import type {
   Colaborador,
@@ -22,6 +23,21 @@ async function construirYSubirPdf(
   estadoFinal: "aprobada" | "rechazada",
   motivoRechazo?: string
 ): Promise<{ pdfPath?: string; error?: string }> {
+  if (solicitud.tipo === "certificado") {
+    // Un certificado rechazado no genera documento; solo el aprobado produce el PDF.
+    if (estadoFinal === "rechazada") return {};
+
+    const resultado = await construirPdfCertificado(supabase, solicitud, false);
+    if ("error" in resultado) return { error: resultado.error };
+
+    const pdfPath = `${solicitud.id}.pdf`;
+    const { error: errorUpload } = await supabase.storage
+      .from("pdfs")
+      .upload(pdfPath, resultado.pdf, { contentType: "application/pdf", upsert: true });
+    if (errorUpload) return { error: "No se pudo guardar el PDF: " + errorUpload.message };
+    return { pdfPath };
+  }
+
   const { data: colaborador } = await supabase
     .from("colaborador")
     .select("*")
