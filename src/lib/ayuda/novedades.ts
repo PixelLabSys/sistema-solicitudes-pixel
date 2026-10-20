@@ -8,6 +8,15 @@ export type Novedad = {
 // La más reciente va primero: su versión es la que dispara el aviso rojo del menú.
 export const NOVEDADES: Novedad[] = [
   {
+    version: "2026-10-20",
+    fecha: "20 de octubre de 2026",
+    titulo: "Buzón de dudas y sugerencias",
+    puntos: [
+      "Al final de Ayuda hay un buzón para escribir dudas, sugerencias o avisar que algo no funciona.",
+      "El mensaje llega al equipo de Inteligencia de Negocio con tu nombre y correo, y te responden directamente a tu correo.",
+    ],
+  },
+  {
     version: "2026-10-19",
     fecha: "19 de octubre de 2026",
     titulo: "Certificado laboral y centro de ayuda",
