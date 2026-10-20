@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { NOVEDADES } from "@/lib/ayuda/novedades";
 import { MANUALES, type RolAyuda } from "@/lib/ayuda/manuales";
 import { marcarAyudaVista } from "./actions";
+import { ContactoSoporte } from "./contacto-soporte";
 
 export function AyudaContenido({ roles, hayNovedad }: { roles: RolAyuda[]; hayNovedad: boolean }) {
   const [pestana, setPestana] = useState<"novedades" | "manual">("novedades");
@@ -97,6 +98,8 @@ export function AyudaContenido({ roles, hayNovedad }: { roles: RolAyuda[]; hayNo
           </div>
         </div>
       )}
+
+      <ContactoSoporte />
     </div>
   );
 }

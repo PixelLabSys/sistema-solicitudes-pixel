@@ -12,10 +12,11 @@ export function plantillaCorreo(params: {
   eyebrow: string;
   titulo: string;
   parrafosHtml: string;
-  ctaTexto?: string;
+  ctaTexto?: string | null; // null = sin botón
   colorEyebrow?: string;
+  pie?: string; // reemplaza la nota «mensaje automático»
 }) {
-  const { eyebrow, titulo, parrafosHtml, ctaTexto = "Ir al Sistema de Solicitudes", colorEyebrow = ORANGE } = params;
+  const { eyebrow, titulo, parrafosHtml, ctaTexto = "Ir al Sistema de Solicitudes", colorEyebrow = ORANGE, pie } = params;
 
   return `
 <!doctype html>
@@ -52,18 +53,18 @@ export function plantillaCorreo(params: {
                 ${parrafosHtml}
               </td>
             </tr>
-            <tr>
+            ${ctaTexto === null ? `<tr><td style="padding:0 0 16px 0;"></td></tr>` : `            <tr>
               <td style="padding:24px 32px 32px 32px;">
                 <a href="${APP_URL}" style="display:inline-block; background:${NAVY}; color:#ffffff; text-decoration:none; font-size:14px; font-weight:600; padding:12px 24px; border-radius:8px;">
                   ${ctaTexto}
                 </a>
               </td>
-            </tr>
+            </tr>`}
             <tr>
               <td style="padding:20px 32px; border-top:1px solid ${BORDE}; text-align:center;">
                 <p style="margin:0; font-size:11px; color:${GRIS_CLARO};">
                   Pixel Graphic SAS &middot; Sistema de Solicitudes<br />
-                  Este es un mensaje automático, no respondas a este correo.
+                  ${pie ?? "Este es un mensaje automático, no respondas a este correo."}
                 </p>
               </td>
             </tr>
