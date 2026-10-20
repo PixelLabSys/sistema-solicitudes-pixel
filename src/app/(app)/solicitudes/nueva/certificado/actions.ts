@@ -51,12 +51,11 @@ export async function crearSolicitudCertificado(formData: FormData) {
   const supabase = await createClient();
 
   const destinatario = String(formData.get("destinatario") || "").trim();
-  const cargo = String(formData.get("cargo") || "").trim();
   const motivo = String(formData.get("motivo") || "").trim();
   const incluir_salario = formData.get("incluir_salario") === "on";
 
-  if (!destinatario || !cargo || !motivo) {
-    return { error: "El destinatario, el cargo y el motivo son obligatorios." };
+  if (!destinatario || !motivo) {
+    return { error: "El destinatario y el motivo son obligatorios." };
   }
   if (destinatario.length > 150) {
     return { error: "El destinatario no puede superar 150 caracteres." };
@@ -67,11 +66,12 @@ export async function crearSolicitudCertificado(formData: FormData) {
 
   const { data: contrato } = await supabase
     .from("colaborador_contrato")
-    .select("colaborador_id")
+    .select("rol")
     .eq("colaborador_id", colaborador.id)
     .maybeSingle();
 
-  if (!colaborador.genero || !contrato) {
+  const rol = contrato?.rol?.trim();
+  if (!colaborador.genero || !contrato || !rol) {
     return { error: "Talento Humano aún no ha cargado tus datos laborales. No se puede radicar todavía." };
   }
 
@@ -95,7 +95,7 @@ export async function crearSolicitudCertificado(formData: FormData) {
   const { error: errorDetalle } = await supabase.from("solicitud_certificado").insert({
     solicitud_id: solicitud.id,
     destinatario,
-    cargo,
+    cargo: rol,
     motivo,
     incluir_salario,
   });

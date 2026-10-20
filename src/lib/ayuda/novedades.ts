@@ -8,6 +8,17 @@ export type Novedad = {
 // La más reciente va primero: su versión es la que dispara el aviso rojo del menú.
 export const NOVEDADES: Novedad[] = [
   {
+    version: "2026-10-20-certificados",
+    fecha: "20 de octubre de 2026",
+    titulo: "Mejoras al certificado laboral",
+    puntos: [
+      "Nuevo diseño del certificado: título, fecha, una tabla con cargo, fecha de ingreso, tipo de contrato y salario (si lo pediste), y la firma de quien lo aprueba.",
+      "El certificado muestra el rol que Talento Humano configuró para cada persona, así que ya no tienes que elegir tu cargo al solicitarlo.",
+      "Puedes dirigirlo a \"A quien pueda interesar\" con una casilla; ese texto sale en letra regular y los destinatarios específicos en negrita.",
+      "Cuando quien firma pide su propio certificado, lo aprueba y lo firma el Líder General.",
+    ],
+  },
+  {
     version: "2026-10-20",
     fecha: "20 de octubre de 2026",
     titulo: "Buzón de dudas y sugerencias",

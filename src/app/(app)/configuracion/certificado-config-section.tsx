@@ -1,23 +1,22 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import type { CertificadoConfig, Colaborador } from "@/lib/types";
+import type { CertificadoConfig, CertificadoFirmante, Colaborador } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
-import { guardarConfigCertificado } from "./actions";
+import { guardarFirmante, guardarFirmantePrincipal } from "./actions";
 
-export function CertificadoConfigSection({
-  colaboradores,
-  config,
-  tieneFirma,
+function TarjetaFirmante({
+  colaborador,
+  etiqueta,
+  firmante,
 }: {
-  colaboradores: Colaborador[];
-  config: CertificadoConfig | null;
-  tieneFirma: boolean;
+  colaborador: Colaborador;
+  etiqueta: string;
+  firmante?: CertificadoFirmante;
 }) {
-  const [firmanteId, setFirmanteId] = useState(config?.firmante_id ?? "");
-  const [cargo, setCargo] = useState(config?.firmante_cargo ?? "");
-  const [telefono, setTelefono] = useState(config?.firmante_telefono ?? "");
-  const [firmaCargada, setFirmaCargada] = useState(tieneFirma);
+  const [cargo, setCargo] = useState(firmante?.cargo ?? "");
+  const [telefono, setTelefono] = useState(firmante?.telefono ?? "");
+  const [firmaCargada, setFirmaCargada] = useState(Boolean(firmante));
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -57,13 +56,8 @@ export function CertificadoConfigSection({
       const firma = await subirFirma();
       if (!firma.ok) return;
 
-      if (!firma.ruta && !firmaCargada) {
-        setError("Sube la imagen de la firma.");
-        return;
-      }
-
-      const res = await guardarConfigCertificado({
-        firmante_id: firmanteId,
+      const res = await guardarFirmante({
+        colaborador_id: colaborador.id,
         cargo,
         telefono,
         firma_path: firma.ruta,
@@ -72,42 +66,29 @@ export function CertificadoConfigSection({
         setError(res.error);
         return;
       }
-      if (firma.ruta) {
-        setFirmaCargada(true);
-        if (firmaRef.current) firmaRef.current.value = "";
-      }
+      setFirmaCargada(true);
+      if (firmaRef.current) firmaRef.current.value = "";
       setGuardado(true);
     });
   }
 
   return (
-    <div className="card" style={{ marginBottom: 24 }}>
-      <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Certificado laboral: quién firma</p>
-      <p style={{ fontSize: 12, color: "var(--muted)", marginBottom: 14 }}>
-        La persona elegida aprueba las solicitudes de certificado y su firma aparece en el documento. Si ella misma
-        pide un certificado, lo aprueba el Líder General.
-      </p>
+    <div style={{ border: "1px solid var(--border)", borderRadius: 10, padding: 16, marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+        <p style={{ fontSize: 13, fontWeight: 600 }}>{colaborador.nombre_completo}</p>
+        <span className="badge badge-blue">{etiqueta}</span>
+        <span className={`badge ${firmaCargada ? "badge-green" : "badge-yellow"}`}>
+          {firmaCargada ? "Firma configurada" : "Falta configurar"}
+        </span>
+      </div>
 
       {error && (
-        <div className="alert alert-error" style={{ marginBottom: 14 }}>
+        <div className="alert alert-error" style={{ marginBottom: 12 }}>
           {error}
         </div>
       )}
 
-      <div className="form-grid" style={{ marginBottom: 14 }}>
-        <div className="form-group">
-          <label className="form-label">Firmante</label>
-          <select className="form-select" value={firmanteId} onChange={(e) => setFirmanteId(e.target.value)}>
-            <option value="">Selecciona...</option>
-            {colaboradores
-              .filter((c) => c.activo)
-              .map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre_completo}
-                </option>
-              ))}
-          </select>
-        </div>
+      <div className="form-grid" style={{ marginBottom: 12 }}>
         <div className="form-group">
           <label className="form-label">Cargo que aparece en la firma</label>
           <input className="form-input" value={cargo} onChange={(e) => setCargo(e.target.value)} />
@@ -116,7 +97,7 @@ export function CertificadoConfigSection({
           <label className="form-label">Teléfono</label>
           <input className="form-input" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
         </div>
-        <div className="form-group">
+        <div className="form-group form-full">
           <label className="form-label">Imagen de la firma (JPG o PNG)</label>
           <input ref={firmaRef} type="file" accept="image/jpeg,image/png" className="form-input" />
           <p className="form-hint">
@@ -125,9 +106,89 @@ export function CertificadoConfigSection({
         </div>
       </div>
 
-      <button className="btn btn-primary" disabled={pending} onClick={guardar}>
+      <button className="btn btn-primary btn-sm" disabled={pending} onClick={guardar}>
         {pending ? "Guardando..." : guardado ? "Guardado" : "Guardar"}
       </button>
+    </div>
+  );
+}
+
+export function CertificadoConfigSection({
+  colaboradores,
+  config,
+  firmantes,
+}: {
+  colaboradores: Colaborador[];
+  config: CertificadoConfig | null;
+  firmantes: CertificadoFirmante[];
+}) {
+  const [principalId, setPrincipalId] = useState(config?.firmante_id ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const [guardado, setGuardado] = useState(false);
+  const [pending, startTransition] = useTransition();
+
+  const activos = colaboradores.filter((c) => c.activo);
+  const liderGeneral = activos.find((c) => c.es_lider_general);
+  const principal = activos.find((c) => c.id === (config?.firmante_id ?? ""));
+  const mapa = new Map(firmantes.map((f) => [f.colaborador_id, f]));
+
+  function guardarPrincipal() {
+    setError(null);
+    setGuardado(false);
+    startTransition(async () => {
+      const res = await guardarFirmantePrincipal(principalId);
+      if (res?.error) setError(res.error);
+      else setGuardado(true);
+    });
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 24 }}>
+      <p style={{ fontSize: 14, fontWeight: 500, marginBottom: 4 }}>Certificado laboral: quién aprueba y firma</p>
+      <p style={{ fontSize: 12, color: "var(--muted)", marginBottom: 14 }}>
+        En cada certificado firma quien lo aprueba. Lo aprueba la persona principal; si ella misma pide uno, lo aprueba y
+        lo firma el Líder General.
+      </p>
+
+      {error && (
+        <div className="alert alert-error" style={{ marginBottom: 14 }}>
+          {error}
+        </div>
+      )}
+
+      <div style={{ display: "flex", gap: 8, alignItems: "flex-end", flexWrap: "wrap", marginBottom: 16 }}>
+        <div className="form-group" style={{ minWidth: 260 }}>
+          <label className="form-label">Aprobador y firmante principal</label>
+          <select className="form-select" value={principalId} onChange={(e) => setPrincipalId(e.target.value)}>
+            <option value="">Selecciona...</option>
+            {activos.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre_completo}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button className="btn btn-primary btn-sm" disabled={pending} onClick={guardarPrincipal}>
+          {pending ? "Guardando..." : guardado ? "Guardado" : "Guardar"}
+        </button>
+      </div>
+
+      {principal && <TarjetaFirmante key={principal.id} colaborador={principal} etiqueta="Principal" firmante={mapa.get(principal.id)} />}
+
+      {liderGeneral && liderGeneral.id !== principal?.id ? (
+        <TarjetaFirmante
+          key={liderGeneral.id}
+          colaborador={liderGeneral}
+          etiqueta="Líder General (respaldo)"
+          firmante={mapa.get(liderGeneral.id)}
+        />
+      ) : (
+        !liderGeneral && (
+          <div className="alert alert-warning">
+            No hay un Líder General activo. Sin él, la persona principal no podría pedir su propio certificado.
+          </div>
+        )
+      )}
     </div>
   );
 }

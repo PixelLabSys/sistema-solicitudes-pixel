@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
-import type { Area, Cargo, CertificadoConfig, Colaborador, ColaboradorContrato } from "@/lib/types";
+import type { Area, Cargo, CertificadoConfig, CertificadoFirmante, Colaborador, ColaboradorContrato } from "@/lib/types";
 import { ColaboradorForm } from "./colaborador-form";
 import { ColaboradorRow } from "./colaborador-row";
 import { ImportarExcelForm } from "./importar-excel-form";
@@ -34,14 +34,14 @@ export default async function ConfiguracionPage() {
   }
 
   const supabase = await createClient();
-  const [{ data: colaboradores }, { data: areas }, { data: cargos }, { data: contratos }, { data: certConfig }, { data: certFirma }] =
+  const [{ data: colaboradores }, { data: areas }, { data: cargos }, { data: contratos }, { data: certConfig }, { data: certFirmantes }] =
     await Promise.all([
     supabase.from("colaborador").select("*").order("nombre_completo"),
     supabase.from("area").select("*").order("nombre"),
     supabase.from("cargo").select("*").order("nombre"),
     supabase.from("colaborador_contrato").select("*"),
     supabase.from("certificado_config").select("*").maybeSingle(),
-    supabase.from("certificado_firma").select("id").maybeSingle(),
+    supabase.from("certificado_firmante").select("*"),
   ]);
 
   const lista = (colaboradores ?? []) as Colaborador[];
@@ -90,7 +90,7 @@ export default async function ConfiguracionPage() {
         alternarActivo={alternarCargoActivo}
       />
 
-      <CertificadoConfigSection colaboradores={lista} config={(certConfig as CertificadoConfig | null) ?? null} tieneFirma={Boolean(certFirma)} />
+      <CertificadoConfigSection colaboradores={lista} config={(certConfig as CertificadoConfig | null) ?? null} firmantes={(certFirmantes ?? []) as CertificadoFirmante[]} />
 
       <DatosLaboralesSection colaboradores={lista} contratos={(contratos ?? []) as ColaboradorContrato[]} />
 

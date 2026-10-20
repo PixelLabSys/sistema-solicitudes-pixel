@@ -53,8 +53,8 @@ export const MANUALES: Record<RolAyuda, Manual> = {
         titulo: "Pedir un certificado laboral",
         pasos: [
           "Elige Nueva: Certificado Laboral.",
-          "Selecciona tu cargo, escribe a quién va dirigido (por ejemplo, el nombre del banco) y el motivo.",
-          "Marca la casilla solo si quieres que el certificado incluya tu salario. La fecha de ingreso, el cargo y el tipo de contrato aparecen siempre.",
+          "Revisa el rol que aparecerá en el certificado (lo define Talento Humano), escribe a quién va dirigido (por ejemplo, el nombre del banco) o marca la casilla para dirigirlo a \"A quien pueda interesar\", y escribe el motivo.",
+          "Marca la casilla solo si quieres que el certificado incluya tu salario. La fecha de ingreso, el rol y el tipo de contrato aparecen siempre.",
           "No necesitas firma. Quien firma los certificados revisa tu solicitud y, al aprobarla, descargas el PDF desde Mis solicitudes.",
           "Si el formulario te dice que faltan tus datos laborales, escribe a Talento Humano para que los carguen.",
           "Un certificado no se puede editar: si te equivocaste, cancélalo y radica uno nuevo.",
@@ -155,7 +155,7 @@ export const MANUALES: Record<RolAyuda, Manual> = {
       {
         titulo: "Datos laborales para certificados",
         pasos: [
-          "En Configuración, sección Datos laborales, completa por cada colaborador: género, fecha de ingreso, tipo de contrato y salario mensual, y pulsa Guardar.",
+          "En Configuración, sección Datos laborales, completa por cada colaborador: rol (el nombre con el que sale en la carta), género, fecha de ingreso, tipo de contrato y salario mensual, y pulsa Guardar.",
           "El estado Completo significa que la persona ya puede pedir su certificado; con Incompleto, el formulario le pide que te escriba.",
           "El salario solo lo ven Talento Humano y el propio colaborador. Quien aprueba un certificado solo recibe el salario cuando el colaborador pidió incluirlo.",
         ],
@@ -163,9 +163,9 @@ export const MANUALES: Record<RolAyuda, Manual> = {
       {
         titulo: "Quién firma los certificados",
         pasos: [
-          "En Configuración, sección Certificado laboral: quién firma, elige a la persona, su cargo, su teléfono y sube la imagen de su firma (JPG o PNG de hasta 2 MB).",
-          "Esa persona aprueba las solicitudes de certificado y su firma aparece en el documento.",
-          "Si la persona que firma pide su propio certificado, lo aprueba el Líder General.",
+          "En Configuración, sección Certificado laboral, elige al aprobador y firmante principal.",
+          "Para cada firmante (el principal y el Líder General) configura su cargo, su teléfono y la imagen de su firma (JPG o PNG de hasta 2 MB).",
+          "En cada certificado firma quien lo aprueba. Si el firmante principal pide su propio certificado, lo aprueba y lo firma el Líder General.",
         ],
       },
     ],
@@ -190,7 +190,7 @@ export const MANUALES: Record<RolAyuda, Manual> = {
       {
         titulo: "Respaldo de certificados laborales",
         parrafo:
-          "Si la persona que firma los certificados pide el suyo, la solicitud te llega a ti para aprobarla.",
+          "Si la persona que firma los certificados pide el suyo, la solicitud te llega a ti: la apruebas y el certificado sale con tu firma. Talento Humano debe tener configurada tu firma, cargo y teléfono.",
       },
       {
         titulo: "Un solo Líder General",

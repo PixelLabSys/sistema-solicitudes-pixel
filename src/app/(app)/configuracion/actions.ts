@@ -144,12 +144,20 @@ const TIPOS_CONTRATO = ["indefinido", "fijo", "obra_labor", "aprendizaje"];
 
 export async function guardarDatosLaborales(
   colaboradorId: string,
-  datos: { genero: string; fecha_ingreso: string; tipo_contrato: string; salario: string }
+  datos: { rol: string; genero: string; fecha_ingreso: string; tipo_contrato: string; salario: string }
 ) {
   await requireLiderTh();
   const supabase = await createClient();
 
   const salario = Number(datos.salario.replace(/[^\d]/g, ""));
+  const rol = datos.rol.trim();
+
+  if (!rol) {
+    return { error: "El rol es obligatorio: es el nombre con el que sale en la carta." };
+  }
+  if (rol.length > 80) {
+    return { error: "El rol no puede superar 80 caracteres." };
+  }
 
   if (datos.genero !== "masculino" && datos.genero !== "femenino") {
     return { error: "Selecciona el género." };
@@ -166,6 +174,7 @@ export async function guardarDatosLaborales(
 
   const { error: errorContrato } = await supabase.from("colaborador_contrato").upsert({
     colaborador_id: colaboradorId,
+    rol,
     fecha_ingreso: datos.fecha_ingreso,
     tipo_contrato: datos.tipo_contrato,
     salario,
@@ -183,8 +192,33 @@ export async function guardarDatosLaborales(
   return { error: null };
 }
 
-export async function guardarConfigCertificado(datos: {
-  firmante_id: string;
+export async function guardarFirmantePrincipal(firmanteId: string) {
+  await requireLiderTh();
+  const supabase = await createClient();
+
+  if (!firmanteId) return { error: "Selecciona quién aprueba los certificados." };
+
+  const { data: firmante } = await supabase
+    .from("colaborador")
+    .select("id")
+    .eq("id", firmanteId)
+    .eq("activo", true)
+    .maybeSingle();
+  if (!firmante) return { error: "La persona seleccionada no existe o está inactiva." };
+
+  const { error } = await supabase.from("certificado_config").upsert({
+    id: true,
+    firmante_id: firmanteId,
+    actualizado_en: new Date().toISOString(),
+  });
+  if (error) return { error: error.message };
+
+  revalidatePath("/configuracion");
+  return { error: null };
+}
+
+export async function guardarFirmante(datos: {
+  colaborador_id: string;
   cargo: string;
   telefono: string;
   firma_path: string | null;
@@ -194,35 +228,25 @@ export async function guardarConfigCertificado(datos: {
 
   const cargo = datos.cargo.trim();
   const telefono = datos.telefono.trim();
-
-  if (!datos.firmante_id) return { error: "Selecciona quién firma los certificados." };
   if (!cargo || !telefono) return { error: "El cargo y el teléfono son obligatorios." };
 
-  const { data: firmante } = await supabase
-    .from("colaborador")
-    .select("id")
-    .eq("id", datos.firmante_id)
-    .eq("activo", true)
+  const { data: existente } = await supabase
+    .from("certificado_firmante")
+    .select("firma_path")
+    .eq("colaborador_id", datos.colaborador_id)
     .maybeSingle();
-  if (!firmante) return { error: "La persona seleccionada no existe o está inactiva." };
 
-  const { error: errorConfig } = await supabase.from("certificado_config").upsert({
-    id: true,
-    firmante_id: datos.firmante_id,
-    firmante_cargo: cargo,
-    firmante_telefono: telefono,
+  const firma_path = datos.firma_path ?? existente?.firma_path;
+  if (!firma_path) return { error: "Sube la imagen de la firma." };
+
+  const { error } = await supabase.from("certificado_firmante").upsert({
+    colaborador_id: datos.colaborador_id,
+    cargo,
+    telefono,
+    firma_path,
     actualizado_en: new Date().toISOString(),
   });
-  if (errorConfig) return { error: errorConfig.message };
-
-  if (datos.firma_path) {
-    const { error: errorFirma } = await supabase.from("certificado_firma").upsert({
-      id: true,
-      firma_path: datos.firma_path,
-      actualizado_en: new Date().toISOString(),
-    });
-    if (errorFirma) return { error: errorFirma.message };
-  }
+  if (error) return { error: error.message };
 
   revalidatePath("/configuracion");
   return { error: null };

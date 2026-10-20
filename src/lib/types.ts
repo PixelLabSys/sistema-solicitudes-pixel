@@ -20,6 +20,15 @@ export type ColaboradorContrato = {
   fecha_ingreso: string;
   tipo_contrato: TipoContrato;
   salario: number;
+  rol: string | null;
+  actualizado_en: string;
+};
+
+export type CertificadoFirmante = {
+  colaborador_id: string;
+  cargo: string;
+  telefono: string;
+  firma_path: string;
   actualizado_en: string;
 };
 

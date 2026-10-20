@@ -5,7 +5,7 @@ alter table certificado_config
   add column if not exists firmante_telefono text;
 
 update certificado_config
-set firmante_cargo = coalesce(firmante_cargo, 'Líder de Gestión del Ser'),
+set firmante_cargo = coalesce(firmante_cargo, 'Líder de Gestión del Talento'),
     firmante_telefono = coalesce(firmante_telefono, '319-3219221')
 where id;
 

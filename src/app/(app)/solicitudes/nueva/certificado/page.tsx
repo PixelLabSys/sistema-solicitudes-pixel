@@ -1,19 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { getColaboradorActual } from "@/lib/data/colaborador-actual";
-import type { Cargo } from "@/lib/types";
 import { CertificadoForm } from "./certificado-form";
 
 export default async function NuevaSolicitudCertificadoPage() {
   const colaborador = await getColaboradorActual();
   const supabase = await createClient();
 
-  const [{ data: contrato }, { data: config }, { data: cargos }] = await Promise.all([
-    supabase.from("colaborador_contrato").select("colaborador_id").eq("colaborador_id", colaborador?.id ?? "").maybeSingle(),
+  const [{ data: contrato }, { data: config }] = await Promise.all([
+    supabase.from("colaborador_contrato").select("rol").eq("colaborador_id", colaborador?.id ?? "").maybeSingle(),
     supabase.from("certificado_config").select("firmante_id").maybeSingle(),
-    supabase.from("cargo").select("*").eq("activo", true).order("nombre"),
   ]);
 
-  const datosCompletos = Boolean(colaborador?.genero && contrato);
+  const rol = contrato?.rol?.trim() ?? "";
+  const datosCompletos = Boolean(colaborador?.genero && contrato && rol);
   const hayFirmante = Boolean(config?.firmante_id);
 
   return (
@@ -27,7 +26,7 @@ export default async function NuevaSolicitudCertificadoPage() {
       <div className="card">
         {!datosCompletos ? (
           <div className="alert alert-warning">
-            Talento Humano aún no ha cargado tus datos laborales (género, fecha de ingreso, tipo de contrato y
+            Talento Humano aún no ha cargado tus datos laborales (rol, género, fecha de ingreso, tipo de contrato y
             salario). Escríbeles para que los completen y puedas radicar tu solicitud.
           </div>
         ) : !hayFirmante ? (
@@ -35,7 +34,7 @@ export default async function NuevaSolicitudCertificadoPage() {
             Aún no está definido quién firma los certificados. Contacta a Talento Humano.
           </div>
         ) : (
-          <CertificadoForm cargos={((cargos ?? []) as Cargo[]).map((c) => c.nombre)} colaborador={colaborador!} />
+          <CertificadoForm rol={rol} colaborador={colaborador!} />
         )}
       </div>
     </div>

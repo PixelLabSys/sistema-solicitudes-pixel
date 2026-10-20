@@ -11,6 +11,7 @@ function FilaDatosLaborales({
   colaborador: Colaborador;
   contrato?: ColaboradorContrato;
 }) {
+  const [rol, setRol] = useState(contrato?.rol ?? "");
   const [genero, setGenero] = useState(colaborador.genero ?? "");
   const [fechaIngreso, setFechaIngreso] = useState(contrato?.fecha_ingreso ?? "");
   const [tipoContrato, setTipoContrato] = useState(contrato?.tipo_contrato ?? "");
@@ -19,13 +20,14 @@ function FilaDatosLaborales({
   const [guardado, setGuardado] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  const completo = Boolean(colaborador.genero && contrato);
+  const completo = Boolean(colaborador.genero && contrato && contrato.rol);
 
   function guardar() {
     setError(null);
     setGuardado(false);
     startTransition(async () => {
       const res = await guardarDatosLaborales(colaborador.id, {
+        rol,
         genero,
         fecha_ingreso: fechaIngreso,
         tipo_contrato: tipoContrato,
@@ -39,6 +41,16 @@ function FilaDatosLaborales({
   return (
     <tr>
       <td>{colaborador.nombre_completo}</td>
+      <td>
+        <input
+          className="form-input"
+          style={{ minWidth: 170 }}
+          maxLength={80}
+          placeholder="Ej. Arte Finalista"
+          value={rol}
+          onChange={(e) => setRol(e.target.value)}
+        />
+      </td>
       <td>
         <select className="form-select" style={{ minWidth: 110 }} value={genero} onChange={(e) => setGenero(e.target.value as typeof genero)}>
           <option value="">—</option>
@@ -104,7 +116,7 @@ export function DatosLaboralesSection({
         <div>
           <p style={{ fontSize: 14, fontWeight: 500 }}>Datos laborales (para certificados)</p>
           <p style={{ fontSize: 12, color: "var(--muted)" }}>
-            Género, fecha de ingreso, tipo de contrato y salario. Solo Talento Humano puede ver y editar el salario.
+            Rol (como aparece en la carta), género, fecha de ingreso, tipo de contrato y salario. Solo Talento Humano puede ver y editar el salario.
           </p>
         </div>
       </div>
@@ -112,6 +124,7 @@ export function DatosLaboralesSection({
         <thead>
           <tr>
             <th>Nombre</th>
+            <th>Rol (sale en la carta)</th>
             <th>Género</th>
             <th>Fecha de ingreso</th>
             <th>Tipo de contrato</th>
