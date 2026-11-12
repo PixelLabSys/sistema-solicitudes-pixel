@@ -345,9 +345,11 @@ export async function generarPdfCertificado(params: {
   const esPng = firmaBytes[0] === 0x89;
   const firma = esPng ? await pdf.embedPng(firmaBytes) : await pdf.embedJpg(firmaBytes);
   const dimsFirma = firma.scaleToFit(150, 100);
+  // La firma se ancla por abajo, justo encima del nombre, sin importar su alto: así una
+  // firma ancha queda pegada al bloque de datos y una alta ocupa el espacio disponible.
   page.drawImage(firma, {
     x: MARGEN_X,
-    y: y(topFirma) - dimsFirma.height,
+    y: y(topFirma + 104),
     width: dimsFirma.width,
     height: dimsFirma.height,
   });
