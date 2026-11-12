@@ -59,6 +59,14 @@ export async function notificarNuevaSolicitud(
   }
 }
 
+function escaparHtml(texto: string) {
+  return texto
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\n/g, "<br/>");
+}
+
 export async function notificarDecision(
   supabase: SupabaseServerClient,
   solicitud: Solicitud,
@@ -82,8 +90,10 @@ export async function notificarDecision(
       parrafosHtml: `
         <p style="margin:0 0 12px 0;">Tu solicitud de ${TIPO_LABEL[solicitud.tipo]} <strong style="color:#0b1b29;">${solicitud.consecutivo}</strong> fue ${estadoFinal}.</p>
         ${
-          !aprobada && motivo
-            ? `<p style="margin:0 0 12px 0; padding:12px 14px; background:#fef2f2; border-radius:8px; color:#991b1b;">Motivo: ${motivo}</p>`
+          motivo?.trim()
+            ? aprobada
+              ? `<p style="margin:0 0 12px 0; padding:12px 14px; background:#f3f4f6; border-radius:8px; color:#374151;"><strong>Observaciones del líder:</strong><br/>${escaparHtml(motivo.trim())}</p>`
+              : `<p style="margin:0 0 12px 0; padding:12px 14px; background:#fef2f2; border-radius:8px; color:#991b1b;"><strong>Motivo:</strong><br/>${escaparHtml(motivo.trim())}</p>`
             : ""
         }
         <p style="margin:0;">${cierre}</p>
@@ -92,7 +102,7 @@ export async function notificarDecision(
     });
 
     const text = `Tu solicitud de ${TIPO_LABEL[solicitud.tipo]} ${solicitud.consecutivo} fue ${estadoFinal}.${
-      !aprobada && motivo ? `\n\nMotivo: ${motivo}` : ""
+      motivo?.trim() ? `\n\n${aprobada ? "Observaciones del líder" : "Motivo"}: ${motivo.trim()}` : ""
     }\n\n${cierre} ${APP_URL}`;
 
     const { error } = await resend.emails.send({

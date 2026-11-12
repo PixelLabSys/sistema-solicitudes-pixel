@@ -43,6 +43,7 @@ export type Solicitud = {
   lider_aprobador_id: string;
   estado: EstadoSolicitud;
   motivo_rechazo: string | null;
+  observaciones_lider: string | null;
   firma_url: string | null;
   pdf_url: string | null;
   creado_en: string;

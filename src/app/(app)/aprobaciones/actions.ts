@@ -21,7 +21,8 @@ async function construirYSubirPdf(
   solicitud: Solicitud,
   lider: Colaborador,
   estadoFinal: "aprobada" | "rechazada",
-  motivoRechazo?: string
+  motivoRechazo?: string,
+  observaciones?: string
 ): Promise<{ pdfPath?: string; error?: string }> {
   if (solicitud.tipo === "certificado") {
     // Un certificado rechazado no genera documento; solo el aprobado produce el PDF.
@@ -80,6 +81,7 @@ async function construirYSubirPdf(
     detalle: detalle as SolicitudPermisoDetalle | SolicitudVacacionesDetalle | SolicitudNominaDetalle,
     estadoFinal,
     motivoRechazo,
+    observaciones,
     firmaBytes,
   });
 
@@ -95,9 +97,16 @@ async function construirYSubirPdf(
   return { pdfPath };
 }
 
-export async function aprobarSolicitud(solicitudId: string) {
+const MAX_OBSERVACIONES = 1000;
+
+export async function aprobarSolicitud(solicitudId: string, observaciones?: string) {
   const colaborador = await getColaboradorActual();
   if (!colaborador) throw new Error("No autenticado.");
+
+  const obs = observaciones?.trim() || null;
+  if (obs && obs.length > MAX_OBSERVACIONES) {
+    return { error: `Las observaciones no pueden superar ${MAX_OBSERVACIONES} caracteres.` };
+  }
 
   const supabase = await createClient();
 
@@ -115,13 +124,15 @@ export async function aprobarSolicitud(solicitudId: string) {
     supabase,
     solicitud as Solicitud,
     colaborador,
-    "aprobada"
+    "aprobada",
+    undefined,
+    obs ?? undefined
   );
   if (errorPdf) return { error: errorPdf };
 
   const { error } = await supabase
     .from("solicitud")
-    .update({ estado: "aprobada", pdf_url: pdfPath })
+    .update({ estado: "aprobada", pdf_url: pdfPath, observaciones_lider: obs })
     .eq("id", solicitudId)
     .eq("lider_aprobador_id", colaborador.id);
 
@@ -140,7 +151,7 @@ export async function aprobarSolicitud(solicitudId: string) {
     .single();
 
   if (solicitante) {
-    await notificarDecision(supabase, solicitud as Solicitud, solicitante as Colaborador, "aprobada");
+    await notificarDecision(supabase, solicitud as Solicitud, solicitante as Colaborador, "aprobada", obs ?? undefined);
     await notificarLiderTH(supabase, solicitud as Solicitud, solicitante as Colaborador);
   }
 
@@ -154,6 +165,9 @@ export async function rechazarSolicitud(solicitudId: string, motivo: string) {
 
   if (!motivo.trim()) {
     return { error: "El motivo de rechazo es obligatorio." };
+  }
+  if (motivo.trim().length > MAX_OBSERVACIONES) {
+    return { error: `El motivo no puede superar ${MAX_OBSERVACIONES} caracteres.` };
   }
 
   const supabase = await createClient();
@@ -179,7 +193,12 @@ export async function rechazarSolicitud(solicitudId: string, motivo: string) {
 
   const { error } = await supabase
     .from("solicitud")
-    .update({ estado: "rechazada", motivo_rechazo: motivo.trim(), pdf_url: pdfPath })
+    .update({
+      estado: "rechazada",
+      motivo_rechazo: motivo.trim(),
+      observaciones_lider: motivo.trim(),
+      pdf_url: pdfPath,
+    })
     .eq("id", solicitudId)
     .eq("lider_aprobador_id", colaborador.id);
 

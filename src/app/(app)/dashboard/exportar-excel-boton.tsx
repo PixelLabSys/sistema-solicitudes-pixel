@@ -25,6 +25,7 @@ export type FilaExport = {
   transferencia_bancaria: string;
   descripcion: string;
   motivo_rechazo: string;
+  observaciones_lider: string;
 };
 
 export function ExportarExcelBoton({ filas }: { filas: FilaExport[] }) {
@@ -58,6 +59,7 @@ export function ExportarExcelBoton({ filas }: { filas: FilaExport[] }) {
         "Transferencia bancaria": f.transferencia_bancaria,
         "Descripción / Observaciones": f.descripcion,
         "Motivo de rechazo": f.motivo_rechazo,
+        "Observaciones del líder": f.observaciones_lider,
       }));
 
       const hoja = XLSX.utils.json_to_sheet(datos);
@@ -84,6 +86,7 @@ export function ExportarExcelBoton({ filas }: { filas: FilaExport[] }) {
         { wch: 14 },
         { wch: 34 },
         { wch: 30 },
+        { wch: 40 },
       ];
 
       const libro = XLSX.utils.book_new();

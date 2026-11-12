@@ -63,7 +63,7 @@ export const MANUALES: Record<RolAyuda, Manual> = {
       {
         titulo: "Seguir tus solicitudes",
         parrafo:
-          "En Mis solicitudes ves el historial con su estado: Pendiente (esperando decisión), Aprobada, Rechazada (se muestra el motivo) o Cancelada. Recibes un correo cuando tu solicitud es decidida.",
+          "En Mis solicitudes ves el historial con su estado: Pendiente (esperando decisión), Aprobada, Rechazada o Cancelada. En las decididas ves las observaciones del líder, si dejó alguna (en un rechazo, es el motivo). Recibes un correo cuando tu solicitud es decidida.",
         pasos: [
           "Mientras esté Pendiente puedes editarla o cancelarla (los certificados solo se cancelan).",
           "Cuando hay PDF, el ojo lo abre en una pestaña nueva y la flecha lo descarga.",
@@ -95,8 +95,9 @@ export const MANUALES: Record<RolAyuda, Manual> = {
         pasos: [
           "Abre la Bandeja de aprobación: cada tarjeta resume la solicitud.",
           "Pulsa Ver solicitud para abrir el documento completo en una pestaña nueva. Si el colaborador adjuntó un soporte, también puedes abrirlo con Ver soporte.",
-          "Pulsa Aprobar para aprobarla: el sistema genera el PDF y avisa al colaborador.",
-          "Pulsa Rechazar y escribe el motivo, que es obligatorio, y confirma el rechazo.",
+          "Debajo de cada tarjeta hay un campo de Observaciones. Puedes escribir allí información para el colaborador, tanto si apruebas como si rechazas.",
+          "Pulsa Aprobar: el sistema genera el PDF, avisa al colaborador y le muestra tus observaciones, si dejaste alguna (son opcionales).",
+          "Pulsa Rechazar: en este caso las observaciones son obligatorias porque son el motivo del rechazo. Se te pide confirmar antes de enviarlo.",
         ],
       },
       {

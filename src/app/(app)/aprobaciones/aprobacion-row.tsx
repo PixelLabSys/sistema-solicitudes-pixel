@@ -87,23 +87,27 @@ export function AprobacionRow({
   certificado?: SolicitudCertificadoDetalle;
   urlSoporte?: string;
 }) {
-  const [mostrarRechazo, setMostrarRechazo] = useState(false);
-  const [motivo, setMotivo] = useState("");
+  const [observaciones, setObservaciones] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function handleAprobar() {
     setError(null);
     startTransition(async () => {
-      const res = await aprobarSolicitud(solicitud.id);
+      const res = await aprobarSolicitud(solicitud.id, observaciones);
       if (res?.error) setError(res.error);
     });
   }
 
   function handleRechazar() {
     setError(null);
+    if (!observaciones.trim()) {
+      setError("Para rechazar escribe el motivo en Observaciones.");
+      return;
+    }
+    if (!confirm("¿Rechazar esta solicitud? Se le informará el motivo al colaborador.")) return;
     startTransition(async () => {
-      const res = await rechazarSolicitud(solicitud.id, motivo);
+      const res = await rechazarSolicitud(solicitud.id, observaciones);
       if (res?.error) setError(res.error);
     });
   }
@@ -133,11 +137,6 @@ export function AprobacionRow({
               Motivo: {certificado.motivo}
             </p>
           )}
-          {error && !mostrarRechazo && (
-            <div className="form-error" style={{ marginTop: 8 }}>
-              {error}
-            </div>
-          )}
         </div>
         <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
           <a
@@ -163,31 +162,28 @@ export function AprobacionRow({
           <button className="btn btn-success btn-sm" disabled={pending} onClick={handleAprobar}>
             Aprobar
           </button>
-          <button
-            className="btn btn-danger btn-sm"
-            disabled={pending}
-            onClick={() => setMostrarRechazo((v) => !v)}
-          >
+          <button className="btn btn-danger btn-sm" disabled={pending} onClick={handleRechazar}>
             Rechazar
           </button>
         </div>
       </div>
 
-      {mostrarRechazo && (
-        <div style={{ marginTop: 14, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
-          {error && <div className="form-error" style={{ marginBottom: 8 }}>{error}</div>}
-          <label className="form-label">Motivo de rechazo (obligatorio)</label>
-          <textarea
-            className="form-textarea"
-            value={motivo}
-            onChange={(e) => setMotivo(e.target.value)}
-            style={{ marginTop: 5, marginBottom: 10 }}
-          />
-          <button className="btn btn-danger btn-sm" disabled={pending} onClick={handleRechazar}>
-            {pending ? "Enviando..." : "Confirmar rechazo"}
-          </button>
-        </div>
-      )}
+      <div style={{ marginTop: 14, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+        <label className="form-label">Observaciones (opcionales al aprobar, obligatorias al rechazar)</label>
+        <textarea
+          className="form-textarea"
+          maxLength={1000}
+          value={observaciones}
+          onChange={(e) => setObservaciones(e.target.value)}
+          placeholder="Escribe aquí cualquier información que quieras compartir con el colaborador"
+          style={{ marginTop: 5 }}
+        />
+        {error && (
+          <div className="form-error" style={{ marginTop: 8 }}>
+            {error}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

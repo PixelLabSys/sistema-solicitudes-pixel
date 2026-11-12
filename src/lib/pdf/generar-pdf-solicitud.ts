@@ -94,18 +94,56 @@ export async function generarPdfSolicitud(params: {
   detalle: SolicitudPermisoDetalle | SolicitudVacacionesDetalle | SolicitudNominaDetalle;
   estadoFinal: Extract<EstadoSolicitud, "aprobada" | "rechazada" | "pendiente">;
   motivoRechazo?: string | null;
+  observaciones?: string | null;
   firmaBytes: Uint8Array;
 }): Promise<Uint8Array> {
-  const { solicitud, colaborador, lider, detalle, estadoFinal, motivoRechazo, firmaBytes } = params;
+  const { solicitud, colaborador, lider, detalle, estadoFinal, motivoRechazo, observaciones, firmaBytes } = params;
 
   const pdf = await PDFDocument.create();
-  const page = pdf.addPage([595.28, 841.89]); // A4
+  let page = pdf.addPage([595.28, 841.89]); // A4
   const { width } = page.getSize();
   const marginX = 50;
   const contentWidth = width - marginX * 2;
 
   const fontRegular = await pdf.embedFont(StandardFonts.Helvetica);
   const fontBold = await pdf.embedFont(StandardFonts.HelveticaBold);
+
+  const ALTO_PAGINA = 841.89;
+  const MARGEN_INFERIOR = 60;
+  const LINEA = 12.5;
+
+  // Parte un texto largo en líneas que caben en el ancho dado. Respeta los saltos de
+  // línea que escribió la persona y corta las palabras que no caben solas.
+  function partirEnLineas(txt: string, font: PDFFont, size: number, anchoMax: number): string[] {
+    const soportados = new Set(font.getCharacterSet());
+    const salida: string[] = [];
+    for (const parrafo of txt.split(/\r?\n/)) {
+      const limpio = [...parrafo.replace(/\t/g, " ")].filter((c) => soportados.has(c.codePointAt(0)!)).join("");
+      let actual = "";
+      for (const palabra of limpio.split(/\s+/).filter(Boolean)) {
+        let resto = palabra;
+        while (font.widthOfTextAtSize(resto, size) > anchoMax) {
+          let n = resto.length;
+          while (n > 1 && font.widthOfTextAtSize(resto.slice(0, n), size) > anchoMax) n--;
+          if (actual) {
+            salida.push(actual);
+            actual = "";
+          }
+          salida.push(resto.slice(0, n));
+          resto = resto.slice(n);
+        }
+        const prueba = actual ? `${actual} ${resto}` : resto;
+        if (actual && font.widthOfTextAtSize(prueba, size) > anchoMax) {
+          salida.push(actual);
+          actual = resto;
+        } else {
+          actual = prueba;
+        }
+      }
+      salida.push(actual);
+    }
+    return salida;
+  }
 
   // ---- Logo ----
   let logoDims = { width: 0, height: 0 };
@@ -214,19 +252,53 @@ export async function generarPdfSolicitud(params: {
   texto("VALOR", colValorX, y - headerAlto + 8, { size: 9, bold: true, color: rgb(1, 1, 1) });
   y -= headerAlto;
 
-  campos.forEach(([campo, valor], i) => {
-    if (i % 2 === 1) {
-      page.drawRectangle({
-        x: marginX,
-        y: y - filaAlto,
-        width: contentWidth,
-        height: filaAlto,
-        color: rgb(0.97, 0.97, 0.98),
-      });
+  function asegurarEspacio(alto: number) {
+    if (y - alto < MARGEN_INFERIOR) {
+      page = pdf.addPage([595.28, ALTO_PAGINA]);
+      y = ALTO_PAGINA - 50;
     }
-    texto(campo, colCampoX, y - filaAlto + 7, { size: 9.5 });
-    texto(valor, colValorX, y - filaAlto + 7, { size: 9.5 });
-    y -= filaAlto;
+  }
+
+  const anchoValor = marginX + contentWidth - colValorX - 12;
+
+  campos.forEach(([campo, valor], i) => {
+    const lineas = partirEnLineas(valor, fontRegular, 9.5, anchoValor);
+    let inicio = 0;
+
+    // Una fila larga se parte entre páginas en vez de saltar entera y dejar la anterior en blanco.
+    while (inicio < lineas.length) {
+      const disponible = y - MARGEN_INFERIOR;
+      const caben = disponible < filaAlto ? 0 : Math.floor((disponible - filaAlto) / LINEA) + 1;
+      if (caben < 1) {
+        page = pdf.addPage([595.28, ALTO_PAGINA]);
+        y = ALTO_PAGINA - 50;
+        continue;
+      }
+
+      const tomar = Math.min(lineas.length - inicio, caben);
+      const alto = filaAlto + (tomar - 1) * LINEA;
+
+      if (i % 2 === 1) {
+        page.drawRectangle({
+          x: marginX,
+          y: y - alto,
+          width: contentWidth,
+          height: alto,
+          color: rgb(0.97, 0.97, 0.98),
+        });
+      }
+      if (inicio === 0) texto(campo, colCampoX, y - 15, { size: 9.5 });
+      lineas.slice(inicio, inicio + tomar).forEach((linea, k) => {
+        page.drawText(linea, { x: colValorX, y: y - 15 - k * LINEA, size: 9.5, font: fontRegular, color: NAVY });
+      });
+      y -= alto;
+      inicio += tomar;
+
+      if (inicio < lineas.length) {
+        page = pdf.addPage([595.28, ALTO_PAGINA]);
+        y = ALTO_PAGINA - 50;
+      }
+    }
   });
 
   page.drawLine({
@@ -237,6 +309,7 @@ export async function generarPdfSolicitud(params: {
   });
 
   y -= 26;
+  asegurarEspacio(110);
 
   // ---- Resultado de la decisión (bloque tipo "totales", alineado a la derecha) ----
   const resultadoLabel =
@@ -261,12 +334,25 @@ export async function generarPdfSolicitud(params: {
   texto("Resultado", marginX + contentWidth - 220, y, { size: 12, bold: true });
   texto(resultadoLabel, marginX + contentWidth, y, { size: 12, bold: true, color: resultadoColor, align: "right" });
 
-  if (estadoFinal === "rechazada" && motivoRechazo) {
-    y -= 20;
-    texto(`Motivo: ${motivoRechazo}`, marginX, y, { size: 9.5, color: GRIS });
+  const textoObservaciones = estadoFinal === "rechazada" ? motivoRechazo : observaciones;
+  if (estadoFinal !== "pendiente" && textoObservaciones?.trim()) {
+    const lineasObs = partirEnLineas(textoObservaciones, fontRegular, 9.5, contentWidth);
+    y -= 28;
+    asegurarEspacio(20 + lineasObs.length * LINEA);
+    texto(estadoFinal === "rechazada" ? "Motivo de rechazo" : "Observaciones del líder", marginX, y, {
+      size: 11,
+      bold: true,
+      color: ORANGE,
+    });
+    y -= 16;
+    lineasObs.forEach((linea) => {
+      page.drawText(linea, { x: marginX, y, size: 9.5, font: fontRegular, color: GRIS });
+      y -= LINEA;
+    });
   }
 
   y -= 40;
+  asegurarEspacio(140);
 
   // ---- Firma ----
   texto("Firma del colaborador", marginX, y, { size: 11, bold: true, color: ORANGE });
@@ -285,7 +371,8 @@ export async function generarPdfSolicitud(params: {
   const notaTexto =
     "Este documento fue generado automáticamente por el Sistema de Solicitudes de PIXEL GRAPHIC SAS al momento de la decisión. " +
     "Constituye el registro oficial de la solicitud, incluida la firma del colaborador y el resultado de la aprobación.";
-  const notaAlto = 50;
+  const notaAlto = 62;
+  asegurarEspacio(notaAlto + 10);
   page.drawRectangle({
     x: marginX,
     y: y - notaAlto,

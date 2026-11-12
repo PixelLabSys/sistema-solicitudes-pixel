@@ -184,6 +184,7 @@ export default async function DashboardPage({
         vacaciones?.observaciones ??
         (certificado ? `Dirigido a ${certificado.destinatario}. Motivo: ${certificado.motivo}` : ""),
       motivo_rechazo: s.motivo_rechazo ?? "",
+      observaciones_lider: s.observaciones_lider ?? s.motivo_rechazo ?? "",
     };
   });
 

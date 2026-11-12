@@ -61,11 +61,20 @@ export default async function MisSolicitudesPage() {
                 <td style={{ textTransform: "capitalize" }}>{s.tipo}</td>
                 <td>
                   <EstadoBadge estado={s.estado} />
-                  {s.estado === "rechazada" && s.motivo_rechazo && (
-                    <div style={{ fontSize: 11, color: "var(--subtle)", marginTop: 4 }}>
-                      {s.motivo_rechazo}
-                    </div>
-                  )}
+                  {(s.estado === "aprobada" || s.estado === "rechazada") &&
+                    (s.observaciones_lider ?? s.motivo_rechazo) && (
+                      <div
+                        style={{
+                          fontSize: 11,
+                          color: "var(--subtle)",
+                          marginTop: 4,
+                          maxWidth: 340,
+                          whiteSpace: "pre-wrap",
+                        }}
+                      >
+                        Observaciones del líder: {s.observaciones_lider ?? s.motivo_rechazo}
+                      </div>
+                    )}
                 </td>
                 <td className="td-mono">
                   {new Date(s.creado_en).toLocaleDateString("es-CO")}

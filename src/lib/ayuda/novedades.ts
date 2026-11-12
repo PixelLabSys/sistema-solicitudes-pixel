@@ -8,6 +8,16 @@ export type Novedad = {
 // La más reciente va primero: su versión es la que dispara el aviso rojo del menú.
 export const NOVEDADES: Novedad[] = [
   {
+    version: "2026-11-12-observaciones",
+    fecha: "12 de noviembre de 2026",
+    titulo: "Observaciones del líder y PDFs completos",
+    puntos: [
+      "Al aprobar o rechazar una solicitud, el líder siempre puede dejar observaciones. Las ve el colaborador en Mis solicitudes, en el correo de decisión y en el PDF. Al rechazar siguen siendo obligatorias.",
+      "En los PDFs, las descripciones y observaciones largas ya no se cortan: el texto se parte en varias líneas y, si hace falta, continúa en la página siguiente.",
+      "El Excel del Dashboard incluye una columna con las observaciones del líder.",
+    ],
+  },
+  {
     version: "2026-10-20-certificados",
     fecha: "20 de octubre de 2026",
     titulo: "Mejoras al certificado laboral",
