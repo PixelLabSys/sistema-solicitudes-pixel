@@ -8,6 +8,18 @@ export type Novedad = {
 // La más reciente va primero: su versión es la que dispara el aviso rojo del menú.
 export const NOVEDADES: Novedad[] = [
   {
+    version: "2026-11-12-membrete",
+    fecha: "12 de noviembre de 2026",
+    titulo: "Nuevo diseño del certificado laboral y formularios más seguros",
+    puntos: [
+      "El certificado laboral estrena el papel membrete de Pixel Graphic: banda superior con el logo y los datos de contacto de la empresa, y pie con su frase.",
+      "Debajo de la firma salen el nombre, el cargo, el teléfono, el correo y el sitio web de quien firma. Talento Humano configura el correo de cada firmante en Configuración.",
+      "Si el certificado se dirige a \"A quien pueda interesar\", ese texto va solo; con un destinatario específico sale entre \"Señores\" y \"Ciudad\".",
+      "Vacaciones: el formulario valida que la fecha hasta no sea anterior a la fecha desde y que el ingreso a laborar sea posterior al último día de descanso.",
+      "Si algo falla al radicar vacaciones o un adelanto, la solicitud ya no queda a medias en la bandeja del líder.",
+    ],
+  },
+  {
     version: "2026-11-12-observaciones",
     fecha: "12 de noviembre de 2026",
     titulo: "Observaciones del líder y PDFs completos",
