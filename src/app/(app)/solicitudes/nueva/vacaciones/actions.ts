@@ -41,6 +41,12 @@ export async function crearSolicitudVacaciones(formData: FormData) {
   if (!firma_path) {
     return { error: "La firma es obligatoria." };
   }
+  if (fecha_hasta < fecha_desde) {
+    return { error: "La fecha de descanso hasta no puede ser anterior a la fecha desde." };
+  }
+  if (ingreso_a_laborar <= fecha_hasta) {
+    return { error: "El ingreso a laborar debe ser posterior a la última fecha de descanso." };
+  }
 
   const dias_compensados = tipo_vacaciones === "mixtas" ? Number(dias_compensados_raw) : null;
   if (tipo_vacaciones === "mixtas" && (!dias_compensados || dias_compensados < 1 || dias_compensados > 30)) {
@@ -80,6 +86,9 @@ export async function crearSolicitudVacaciones(formData: FormData) {
   });
 
   if (errorDetalle) {
+    // Sin detalle la solicitud no se puede revisar ni decidir: se cancela para que no
+    // quede pendiente en la bandeja del líder.
+    await supabase.from("solicitud").update({ estado: "cancelada" }).eq("id", solicitud.id);
     return { error: errorDetalle.message };
   }
 
@@ -135,6 +144,12 @@ export async function actualizarSolicitudVacaciones(solicitudId: string, formDat
   }
   if (!firma_path) {
     return { error: "La firma es obligatoria." };
+  }
+  if (fecha_hasta < fecha_desde) {
+    return { error: "La fecha de descanso hasta no puede ser anterior a la fecha desde." };
+  }
+  if (ingreso_a_laborar <= fecha_hasta) {
+    return { error: "El ingreso a laborar debe ser posterior a la última fecha de descanso." };
   }
 
   const dias_compensados = tipo_vacaciones === "mixtas" ? Number(dias_compensados_raw) : null;

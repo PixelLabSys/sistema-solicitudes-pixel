@@ -70,6 +70,17 @@ export function VacacionesForm({
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     setError(null);
+    const desde = String(formData.get("fecha_desde"));
+    const hasta = String(formData.get("fecha_hasta"));
+    const ingreso = String(formData.get("ingreso_a_laborar"));
+    if (hasta < desde) {
+      setError("La fecha de descanso hasta no puede ser anterior a la fecha desde.");
+      return;
+    }
+    if (ingreso <= hasta) {
+      setError("El ingreso a laborar debe ser posterior a la última fecha de descanso.");
+      return;
+    }
     startTransition(async () => {
       const rutaFirma = await subirFirma();
       if (!rutaFirma) return;

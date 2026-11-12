@@ -98,6 +98,7 @@ export async function crearSolicitudNomina(formData: FormData) {
   });
 
   if (errorDetalle) {
+    await supabase.from("solicitud").update({ estado: "cancelada" }).eq("id", solicitud.id);
     return { error: errorDetalle.message };
   }
 
