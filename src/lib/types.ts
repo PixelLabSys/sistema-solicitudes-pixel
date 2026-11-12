@@ -28,6 +28,7 @@ export type CertificadoFirmante = {
   colaborador_id: string;
   cargo: string;
   telefono: string;
+  correo: string | null;
   firma_path: string;
   actualizado_en: string;
 };

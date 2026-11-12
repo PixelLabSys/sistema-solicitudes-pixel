@@ -51,7 +51,7 @@ export async function construirPdfCertificado(
     };
   }
 
-  const { firma_path, cargo, telefono } = firmante as CertificadoFirmante;
+  const { firma_path, cargo, telefono, correo } = firmante as CertificadoFirmante;
   const { data: firmaBlob, error: errorFirma } = await supabase.storage.from("firmas").download(firma_path);
   if (errorFirma || !firmaBlob) {
     return { error: "No se pudo leer la firma del certificado: " + (errorFirma?.message ?? "desconocido") };
@@ -65,7 +65,7 @@ export async function construirPdfCertificado(
       tipo_contrato: datos.tipo_contrato,
       salario: datos.salario != null ? Number(datos.salario) : null,
     },
-    firmante: { nombre: aprobador.nombre_completo, cargo, telefono },
+    firmante: { nombre: aprobador.nombre_completo, cargo, telefono, correo },
     firmaBytes: new Uint8Array(await firmaBlob.arrayBuffer()),
     fechaEntrega: new Date(),
     vistaPrevia,

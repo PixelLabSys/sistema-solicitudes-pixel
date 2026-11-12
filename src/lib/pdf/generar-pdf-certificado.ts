@@ -1,18 +1,19 @@
 import { readFile } from "fs/promises";
 import path from "path";
-import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, StandardFonts, degrees, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import type { Colaborador, SolicitudCertificadoDetalle, TipoContrato } from "@/lib/types";
 
 const OSCURO = rgb(0.17, 0.14, 0.13);
-const GRIS = rgb(0.38, 0.38, 0.38);
 const BLANCO = rgb(1, 1, 1);
-const A4 = { ancho: 595.28, alto: 841.89 };
-const MARGEN_X = 60;
-const ANCHO = A4.ancho - MARGEN_X * 2;
+const LETTER = { ancho: 612, alto: 792 };
+const MARGEN_X = 69;
+const ANCHO = 476;
 const TAMANO = 10.5;
-const INTERLINEADO = 16;
-const BAJADA_BLOQUE = 36;
+const INTERLINEADO = 17;
+
+// Respaldo si un firmante aún no tiene correo configurado.
+const CORREO_CERTIFICADOS = "gestiondeltalento@pixel-g.com";
+const SITIO_WEB = "https://pixelgraphicmed.com/";
 
 const TIPO_CONTRATO_TEXTO: Record<TipoContrato, string> = {
   indefinido: "Término indefinido",
@@ -55,9 +56,8 @@ function fechaCorta(yyyyMmDd: string) {
   return `${dia}/${mes}/${anio}`;
 }
 
-// Siempre empieza en mayúscula. "A quien pueda interesar" sale en letra regular; un
-// destinatario específico (banco, entidad, persona) sale en negrita, entre "Señores:" y
-// "Ciudad". "A quien pueda interesar" va solo en esa sección.
+// Siempre empieza en mayúscula. "A quien pueda interesar" va solo y en letra regular; un
+// destinatario específico (banco, entidad, persona) va en negrita, entre "Señores:" y "Ciudad".
 export function formatearDestinatario(destinatario: string): { texto: string; negrita: boolean } {
   const limpio = destinatario.trim().replace(/\s+/g, " ");
   const texto = limpio.charAt(0).toLocaleUpperCase("es") + limpio.slice(1);
@@ -124,7 +124,7 @@ export async function generarPdfCertificado(params: {
   colaborador: Colaborador;
   detalle: SolicitudCertificadoDetalle;
   datosLaborales: { fecha_ingreso: string; tipo_contrato: TipoContrato; salario: number | null };
-  firmante: { nombre: string; cargo: string; telefono: string };
+  firmante: { nombre: string; cargo: string; telefono: string; correo?: string | null };
   firmaBytes: Uint8Array;
   fechaEntrega: Date;
   vistaPrevia: boolean;
@@ -132,34 +132,32 @@ export async function generarPdfCertificado(params: {
   const { colaborador, detalle, datosLaborales, firmante, firmaBytes, fechaEntrega, vistaPrevia } = params;
 
   const pdf = await PDFDocument.create();
-  const page: PDFPage = pdf.addPage([A4.ancho, A4.alto]);
+
+  // El papel membrete (banda superior y pie) es un PDF de Pixel que se usa como fondo; si
+  // faltara el archivo, el certificado se genera igual sobre una hoja Carta en blanco.
+  let page: PDFPage;
+  try {
+    const bytesMembrete = await readFile(path.join(process.cwd(), "public", "plantillas", "membrete-certificado.pdf"));
+    const [membrete] = await pdf.embedPdf(bytesMembrete, [0]);
+    page = pdf.addPage([membrete.width, membrete.height]);
+    page.drawPage(membrete);
+  } catch {
+    page = pdf.addPage([LETTER.ancho, LETTER.alto]);
+  }
+
+  const alto = page.getHeight();
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const negrita = await pdf.embedFont(StandardFonts.HelveticaBold);
 
-  // Pesos Light y Black para el título; si faltan los archivos, usa regular y negrita.
-  let liviana: PDFFont = regular;
-  let muyNegra: PDFFont = negrita;
-  try {
-    pdf.registerFontkit(fontkit);
-    liviana = await pdf.embedFont(await readFile(path.join(process.cwd(), "public", "fonts", "Lato-Light.ttf")), {
-      subset: true,
-    });
-    muyNegra = await pdf.embedFont(await readFile(path.join(process.cwd(), "public", "fonts", "Lato-Black.ttf")), {
-      subset: true,
-    });
-  } catch {
-    // sin las fuentes del título el certificado se genera igual
-  }
-
-  const y = (desdeArriba: number) => A4.alto - desdeArriba;
+  const y = (desdeArriba: number) => alto - desdeArriba;
 
   function texto(
     txt: string,
     x: number,
     desdeArriba: number,
-    opts: { bold?: boolean; light?: boolean; black?: boolean; size?: number; color?: ReturnType<typeof rgb> } = {}
+    opts: { bold?: boolean; size?: number; color?: ReturnType<typeof rgb> } = {}
   ) {
-    const font = opts.black ? muyNegra : opts.light ? liviana : opts.bold ? negrita : regular;
+    const font = opts.bold ? negrita : regular;
     page.drawText(limpiar(txt, font), {
       x,
       y: y(desdeArriba),
@@ -220,7 +218,7 @@ export async function generarPdfCertificado(params: {
   if (vistaPrevia) {
     page.drawText("VISTA PREVIA", {
       x: 110,
-      y: 250,
+      y: 230,
       size: 80,
       font: negrita,
       color: rgb(0.85, 0.85, 0.85),
@@ -229,21 +227,16 @@ export async function generarPdfCertificado(params: {
     });
   }
 
-  // ---- Título ----
-  texto("Certificación", MARGEN_X, 100 + BAJADA_BLOQUE, { light: true, size: 30 });
-  texto("Laboral", MARGEN_X, 134 + BAJADA_BLOQUE, { black: true, size: 30 });
-
   // ---- Fecha y destinatario ----
-  texto(fechaConDiaSemana(fechaEntrega), MARGEN_X, 190 + BAJADA_BLOQUE);
+  texto(fechaConDiaSemana(fechaEntrega), MARGEN_X, 191);
 
   const destinatario = formatearDestinatario(detalle.destinatario);
   if (destinatario.negrita) {
-    texto("Señores:", MARGEN_X, 228 + BAJADA_BLOQUE);
-    texto(destinatario.texto, MARGEN_X, 243 + BAJADA_BLOQUE, { bold: true });
-    texto("Ciudad", MARGEN_X, 258 + BAJADA_BLOQUE);
+    texto("Señores:", MARGEN_X, 251);
+    texto(destinatario.texto, MARGEN_X, 266, { bold: true });
+    texto("Ciudad", MARGEN_X, 281);
   } else {
-    // "A quien pueda interesar" va solo, sin "Señores:" ni "Ciudad".
-    texto(destinatario.texto, MARGEN_X, 243 + BAJADA_BLOQUE);
+    texto(destinatario.texto, MARGEN_X, 266);
   }
 
   // ---- Cuerpo ----
@@ -264,7 +257,7 @@ export async function generarPdfCertificado(params: {
         texto: `, a la fecha de expedición de este certificado, se encuentra vinculad${o_a} laboralmente con la empresa en las siguientes condiciones:`,
       },
     ],
-    296 + BAJADA_BLOQUE
+    323
   );
 
   // ---- Tabla ----
@@ -328,10 +321,9 @@ export async function generarPdfCertificado(params: {
   const resto = `Este certificado se expide a petición del interesado el día ${dia} del mes de ${mes} del año ${anio}.`;
 
   // La primera línea comparte renglón con "*Importante:"; las siguientes usan todo el ancho.
-  const palabrasNota = limpiar(resto, regular).split(/\s+/);
   const lineasNota: string[] = [];
   let lineaNota = "";
-  for (const palabra of palabrasNota) {
+  for (const palabra of limpiar(resto, regular).split(/\s+/)) {
     const limite = lineasNota.length === 0 ? ANCHO - anchoImportante - 4 : ANCHO;
     const prueba = lineaNota ? `${lineaNota} ${palabra}` : palabra;
     if (lineaNota && regular.widthOfTextAtSize(prueba, TAM_NOTA) > limite) {
@@ -348,32 +340,32 @@ export async function generarPdfCertificado(params: {
     texto(l, i === 0 ? MARGEN_X + anchoImportante + 4 : MARGEN_X, yNota + i * 11.5, { size: TAM_NOTA })
   );
 
-  // ---- Firma ----
+  // ---- Firma y datos de quien firma ----
+  const topFirma = yNota + 26 + (lineasNota.length - 1) * 11.5;
   const esPng = firmaBytes[0] === 0x89;
   const firma = esPng ? await pdf.embedPng(firmaBytes) : await pdf.embedJpg(firmaBytes);
-  const dimsFirma = firma.scaleToFit(150, 62);
-  const topFirma = 570;
-  page.drawImage(firma, { x: MARGEN_X, y: y(topFirma) - dimsFirma.height, width: dimsFirma.width, height: dimsFirma.height });
+  const dimsFirma = firma.scaleToFit(150, 100);
+  page.drawImage(firma, {
+    x: MARGEN_X,
+    y: y(topFirma) - dimsFirma.height,
+    width: dimsFirma.width,
+    height: dimsFirma.height,
+  });
 
-  texto(firmante.nombre, MARGEN_X, topFirma + 78, { size: 9.5 });
-  texto(firmante.cargo, MARGEN_X, topFirma + 91, { size: 9.5 });
-  texto(`Teléfono: ${firmante.telefono}`, MARGEN_X, topFirma + 104, { size: 9.5 });
-
-  // ---- Pie: logo y leyenda ----
-  try {
-    const logoBytes = await readFile(path.join(process.cwd(), "public", "pixel-logo.png"));
-    const logo = await pdf.embedPng(logoBytes);
-    const dims = logo.scaleToFit(126.5, 48.3);
-    page.drawImage(logo, { x: MARGEN_X - 5, y: y(728) - dims.height, width: dims.width, height: dims.height });
-  } catch {
-    // sin logo el certificado se genera igual
-  }
-
-  const leyenda =
-    "El único ecosistema integral de la región experto en catálogos. Para confirmar cualquier información puede comunicarse a gestiondeltalento@pixel-g.com";
-  partirEnLineas(leyenda, regular, 8, ANCHO).forEach((linea, i) =>
-    texto(linea, MARGEN_X, 790 + i * 11, { size: 8, color: GRIS })
-  );
+  const TAM_FIRMA = 9.5;
+  const PASO = 12;
+  let yDatos = topFirma + 116;
+  texto(firmante.nombre, MARGEN_X, yDatos, { size: TAM_FIRMA });
+  yDatos += PASO;
+  texto(firmante.cargo, MARGEN_X, yDatos, { size: TAM_FIRMA });
+  yDatos += PASO;
+  texto("PIXEL GRAPHIC S.A.S.", MARGEN_X, yDatos, { bold: true, size: TAM_FIRMA });
+  yDatos += PASO;
+  texto(firmante.telefono, MARGEN_X, yDatos, { size: TAM_FIRMA });
+  yDatos += PASO;
+  texto(firmante.correo?.trim() || CORREO_CERTIFICADOS, MARGEN_X, yDatos, { size: TAM_FIRMA });
+  yDatos += PASO;
+  texto(SITIO_WEB, MARGEN_X, yDatos, { size: TAM_FIRMA });
 
   return pdf.save();
 }

@@ -221,6 +221,7 @@ export async function guardarFirmante(datos: {
   colaborador_id: string;
   cargo: string;
   telefono: string;
+  correo: string;
   firma_path: string | null;
 }) {
   await requireLiderTh();
@@ -228,7 +229,11 @@ export async function guardarFirmante(datos: {
 
   const cargo = datos.cargo.trim();
   const telefono = datos.telefono.trim();
+  const correo = datos.correo.trim().toLowerCase();
   if (!cargo || !telefono) return { error: "El cargo y el teléfono son obligatorios." };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+    return { error: "Escribe un correo electrónico válido para quien firma." };
+  }
 
   const { data: existente } = await supabase
     .from("certificado_firmante")
@@ -243,6 +248,7 @@ export async function guardarFirmante(datos: {
     colaborador_id: datos.colaborador_id,
     cargo,
     telefono,
+    correo,
     firma_path,
     actualizado_en: new Date().toISOString(),
   });

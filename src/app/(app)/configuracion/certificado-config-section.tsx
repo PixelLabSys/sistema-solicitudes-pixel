@@ -16,6 +16,7 @@ function TarjetaFirmante({
 }) {
   const [cargo, setCargo] = useState(firmante?.cargo ?? "");
   const [telefono, setTelefono] = useState(firmante?.telefono ?? "");
+  const [correo, setCorreo] = useState(firmante?.correo ?? "");
   const [firmaCargada, setFirmaCargada] = useState(Boolean(firmante));
   const [error, setError] = useState<string | null>(null);
   const [guardado, setGuardado] = useState(false);
@@ -60,6 +61,7 @@ function TarjetaFirmante({
         colaborador_id: colaborador.id,
         cargo,
         telefono,
+        correo,
         firma_path: firma.ruta,
       });
       if (res?.error) {
@@ -96,6 +98,17 @@ function TarjetaFirmante({
         <div className="form-group">
           <label className="form-label">Teléfono</label>
           <input className="form-input" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
+        </div>
+        <div className="form-group form-full">
+          <label className="form-label">Correo electrónico de quien firma</label>
+          <input
+            type="email"
+            className="form-input"
+            placeholder="nombre@pixel-g.com"
+            value={correo}
+            onChange={(e) => setCorreo(e.target.value)}
+          />
+          <p className="form-hint">Aparece en el bloque de la firma del certificado.</p>
         </div>
         <div className="form-group form-full">
           <label className="form-label">Imagen de la firma (JPG o PNG)</label>

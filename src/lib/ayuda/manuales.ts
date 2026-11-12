@@ -165,7 +165,7 @@ export const MANUALES: Record<RolAyuda, Manual> = {
         titulo: "Quién firma los certificados",
         pasos: [
           "En Configuración, sección Certificado laboral, elige al aprobador y firmante principal.",
-          "Para cada firmante (el principal y el Líder General) configura su cargo, su teléfono y la imagen de su firma (JPG o PNG de hasta 2 MB).",
+          "Para cada firmante (el principal y el Líder General) configura su cargo, su teléfono, su correo electrónico y la imagen de su firma (JPG o PNG de hasta 2 MB). El correo aparece en el bloque de la firma del certificado.",
           "En cada certificado firma quien lo aprueba. Si el firmante principal pide su propio certificado, lo aprueba y lo firma el Líder General.",
         ],
       },
@@ -191,7 +191,7 @@ export const MANUALES: Record<RolAyuda, Manual> = {
       {
         titulo: "Respaldo de certificados laborales",
         parrafo:
-          "Si la persona que firma los certificados pide el suyo, la solicitud te llega a ti: la apruebas y el certificado sale con tu firma. Talento Humano debe tener configurada tu firma, cargo y teléfono.",
+          "Si la persona que firma los certificados pide el suyo, la solicitud te llega a ti: la apruebas y el certificado sale con tu firma. Talento Humano debe tener configurada tu firma, cargo, teléfono y correo electrónico.",
       },
       {
         titulo: "Un solo Líder General",
